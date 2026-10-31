@@ -47,3 +47,9 @@ Add a dated entry only after verifying a decision in the codebase or official pr
 - Decision: The final submission must provide a clearly labeled recorded-response mode in addition to optional live provider mode.
 - Evidence: `OFFICIAL_VERIFICATION.md` records the indexed Devpost judge-access guidance and its requirement to make the workflow testable without private credentials.
 - Consequence: A real YouCam integration must be completed before creating sanitized fixtures; recorded results cannot be presented as fresh inference.
+
+## 2026-10-31 — YouCam integration gate
+
+- Decision: Do not guess the YouCam authorization header or task/result schema.
+- Evidence: `YOUCAM_API_RESEARCH.md`; a metadata-only probe returned HTTP 401 for both direct and Bearer header candidates, without recording response secrets.
+- Consequence: Confirm the generated official request and key status in the YouCam console before implementing provider code.

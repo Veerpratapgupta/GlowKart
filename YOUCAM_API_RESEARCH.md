@@ -1,6 +1,6 @@
 # YouCam API Research
 
-**Status:** Research complete enough to plan, not enough to implement safely  
+**Status:** Research complete enough to plan, not enough to implement safely
 **Checked:** 2026-10-31
 
 ## Official sources
@@ -12,7 +12,7 @@
 - Skin analysis playground: <https://yce.perfectcorp.com/api-console/en/api-playground/ai-skin-analysis/>
 - Makeup VTO playground: <https://yce.perfectcorp.com/api-console/en/api-playground/ai-makeup-virtual-try-on/>
 
-The official documentation pages were not retrievable from this environment because of a DNS/TLS transport failure. The following facts come from indexed search results pointing to those official URLs and must be confirmed in the browser API playground before implementation.
+The official reference pages were not retrievable from this environment because of a DNS/TLS transport failure. The playground landing page is reachable, but its interactive request details are client-rendered. The following facts come from indexed search results pointing to official URLs and a metadata-only endpoint probe; exact auth formatting and schemas still require confirmation in the browser API playground.
 
 ## Strongly indicated workflow
 
@@ -33,11 +33,28 @@ The indexed results identify these paths as likely:
 - `POST /s2s/v2.0/task/skin-analysis`
 - `GET /s2s/v2.0/skin-analysis/{task_id}`
 
+Additional indexed results indicate task polling may use:
+
+- `GET /s2s/v2.0/task/skin-analysis/{task_id}`
+
+The task request is indicated as:
+
+```json
+{
+  "src_file_id": "[file id]",
+  "dst_actions": ["wrinkle", "acne", "moisture"]
+}
+```
+
+The action families appear to include separate SD and HD names, and the two families must not be mixed. Confirm the exact supported action list for the hackathon account before choosing actions.
+
 Do not implement these paths until the exact request and response schemas are copied from the official reference or playground.
 
 ## Authentication
 
-Indexed results indicate an API-key authorization header. The exact header syntax was redacted in search output and is therefore **unverified**. Do not guess it. Confirm the official quick-start example and keep the credential server-side.
+Indexed results indicate an API-key `Authorization` header. The exact header syntax was redacted in search output and is therefore **unverified**. A metadata-only probe against `https://yce-api-01.makeupar.com/s2s/v2.0/file` returned HTTP 401 for both direct and `Bearer` candidates using the local value. This does not prove which format is correct; it may indicate a revoked/wrong key, a required account credential, or an incorrect header format. No response body, signed URL, or credential was recorded.
+
+Do not guess the header. Confirm the official quick-start generated code and keep the credential server-side.
 
 ## Input constraints
 
@@ -59,4 +76,4 @@ Indexed results indicate a makeup VTO operation with a lipstick/lip-color effect
 
 ## Current blocker
 
-No provider code should be written yet. The exact authorization header and schemas are not verified in this environment, and guessing them would create a brittle or unsafe integration.
+No provider code should be written yet. The exact authorization header and schemas are not verified in this environment, and the local metadata probe returned 401. First confirm the key status and generated authorization example in the official console, then repeat only the metadata request before consuming an analysis unit.
