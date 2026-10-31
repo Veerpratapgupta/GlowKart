@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
       "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
+    },
+    "skin-analysis-expert": {
+      "source": "YouCam-API/skills",
+      "sourceType": "github",
+      "skillPath": "skills/skin-analysis-expert/SKILL.md",
+      "computedHash": "7bde48836ee5f00a989cf39c16d01575ad125039bbffd86c84a0756a014a8082"
     }
   }
 }

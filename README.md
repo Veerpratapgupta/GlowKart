@@ -59,6 +59,8 @@ planner → builder → verifier → auditor → fixer/debugger → verifier →
 
 OpenCode is optional and replaceable; the repository documents remain the source of truth.
 
+The official YouCam `skin-analysis-expert` skill is installed under `.agents/skills/`, and the official YouCam beauty MCP is configured in the user-level OpenCode config. Both are development helpers; secrets remain in environment variables and the shipped application must keep its own server-side integration boundary.
+
 ## Judge access
 
 The final prototype will provide a clearly labeled recorded-response mode so judges can test the complete journey without private YouCam credentials. Live provider mode will remain server-side and separately documented.

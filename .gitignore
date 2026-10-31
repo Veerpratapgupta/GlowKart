@@ -9,3 +9,6 @@ dist/
 .DS_Store
 coverage/
 .vercel/
+.venv/
+__pycache__/
+*.py[cod]

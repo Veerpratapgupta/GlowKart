@@ -87,3 +87,13 @@ npx skills add anthropics/skills --skill frontend-design -y
 ```
 
 Use the skill during the design gate and UI-polish phase. Pair it with the project's accessibility and scope-control rules.
+
+The official `skin-analysis-expert` skill from `YouCam-API/skills` is also installed. Its source review reported no socket alerts and low risk. It is an agent helper and CLI reference, not a replacement for the application's server-side boundary. It reads `YOUCAM_API_KEY` from the environment, requires Python plus `requests`/`PyYAML`, and supports a zero-credit key validation command.
+
+Installation:
+
+```bash
+npx skills add YouCam-API/skills --skill skin-analysis-expert --copy --yes
+```
+
+Use it to research and validate provider behavior; do not copy its credentials file into the repository and do not call it from browser code.

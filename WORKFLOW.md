@@ -52,7 +52,15 @@ OpenCode is the helper, not the source of project truth. Keep prompts and decisi
 - Stop after the loop limit; do not retry an exhausted model repeatedly.
 - Never upgrade or add a paid service without explicit approval.
 
-The local `frontend-design` skill is available to OpenCode. No MCP server is currently configured; add an MCP only after reviewing its official source, permissions, and direct value to the current phase.
+The local `frontend-design` skill is available to OpenCode. Add MCP servers only after reviewing their official source, permissions, and direct value to the current phase.
+
+The official YouCam beauty MCP is now configured in the user-level OpenCode config:
+
+- Server: `https://mcp-api-01.makeupar.com/mcp/beauty`
+- Name: `youcam-beauty`
+- Credential: environment placeholder only, never committed
+
+It is for agent-assisted research and controlled provider tasks. The application must still use its own server-side adapter and recorded-response mode. Do not treat an MCP tool result as a substitute for application tests or judge-access documentation.
 
 ## Agent handoff contract
 

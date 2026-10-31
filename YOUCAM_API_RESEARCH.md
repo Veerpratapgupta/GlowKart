@@ -11,6 +11,8 @@
 - Skin analysis reference: <https://docs.perfectcorp.com/reference/ai_skin_analysis>
 - Skin analysis playground: <https://yce.perfectcorp.com/api-console/en/api-playground/ai-skin-analysis/>
 - Makeup VTO playground: <https://yce.perfectcorp.com/api-console/en/api-playground/ai-makeup-virtual-try-on/>
+- Official Agent Skills: <https://github.com/YouCam-API/skills>
+- Official Beauty MCP: <https://github.com/YouCam-API/beauty-personal-care-MCP>
 
 The official reference pages were not retrievable from this environment because of a DNS/TLS transport failure. The playground landing page is reachable, but its interactive request details are client-rendered. The following facts come from indexed search results pointing to official URLs and a metadata-only endpoint probe; exact auth formatting and schemas still require confirmation in the browser API playground.
 
@@ -73,6 +75,16 @@ Indexed results indicate a makeup VTO operation with a lipstick/lip-color effect
 5. Capture a sanitized result fixture from the real integration.
 6. Add a clearly labeled recorded-response mode for judges.
 7. Research and implement lipstick VTO only after Skin AI passes its verification gate.
+
+## Agent helpers
+
+The official `skin-analysis-expert` skill is installed for OpenCode and the official beauty MCP is configured at the user level. The MCP docs identify the remote server as:
+
+```text
+https://mcp-api-01.makeupar.com/mcp/beauty
+```
+
+Its authorization value must include the provider's required `******` prefix. The OpenCode configuration uses an environment placeholder and contains no API key. These helpers are for controlled research/validation; they do not remove the need for a secure application adapter.
 
 ## Current blocker
 
