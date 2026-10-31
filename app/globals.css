@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f2eee5;
+  --paper-deep: #ebe5d9;
+  --ink: #241c17;
+  --stone: #8e857a;
+  --stone-deep: #4a443c;
+  --line: #d8d1c3;
+  --botanic: #2e4b3c;
+  --botanic-hover: #243d31;
+  --botanic-tint: #e3eae1;
+  --lip: #c13b4a;
+  --lip-deep: #a82f3d;
+  --lip-deep-hover: #8f2733;
+  --lip-tint: #f6e8e6;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-stone: var(--stone);
+  --color-stone-deep: var(--stone-deep);
+  --color-line: var(--line);
+  --color-botanic: var(--botanic);
+  --color-botanic-hover: var(--botanic-hover);
+  --color-botanic-tint: var(--botanic-tint);
+  --color-lip: var(--lip);
+  --color-lip-deep: var(--lip-deep);
+  --color-lip-deep-hover: var(--lip-deep-hover);
+  --color-lip-tint: var(--lip-tint);
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 2px solid var(--botanic);
+  outline-offset: 3px;
+}
+
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.step-enter {
+  animation: step-enter 260ms ease-out both;
+}
+
+@keyframes sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.progress-sweep {
+  animation: sweep 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
