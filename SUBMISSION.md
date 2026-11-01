@@ -142,3 +142,29 @@ real, fresh API integration.
   edit the form if something fails; Devpost allows edits until the deadline.
 - Keep the deployed URL and repo public through judging (until ~Nov 24 winner
   announcement).
+
+## How to record the video (practical)
+
+Recommended: **OBS Studio** (free, Windows/macOS/Linux) — 1080p, record the
+browser window only, show the cursor, hide toolbars/dock/notifications.
+Alternatives: macOS `Cmd+Shift+5` screen recording, Windows `Win+G` Game Bar.
+
+Workflow:
+
+1. Open the **deployed HTTPS URL** in a clean browser profile (incognito).
+2. Do one practice run of the §5b script without recording.
+3. Record the real run following §5b (≈100 s): landing → **Use demo photo** →
+   snapshot → toggle **Matte** → matches → **Try the best match** → **Compare
+   shades** → **Keep this shade** → result → **Save this look** (show the
+   download) → **Add to cart** → close.
+4. One extra mobile pass (phone browser or DevTools device emulation) for the
+   "works on the device" requirement.
+5. Optional: 15–20 s **live-mode clip** recorded against `npm run dev` locally
+   with `.env.local` (`GLOWCART_ANALYSIS_MODE=live`,
+   `GLOWCART_LIVE_DEPLOYMENT=protected`, `YOUCAM_AUTHORIZATION`) — label it
+   "live YouCam call" when editing. Never deploy the key.
+6. Edit (CapCut / Clipchamp / iMovie / YouTube's own editor): trim to **1–3 min**,
+   add short on-screen captions for each step, **no music** (rules forbid
+   copyrighted audio), no third-party logos in frame, export MP4 1080p.
+7. Upload to **YouTube as Public or Unlisted**, verify the link plays in an
+   incognito window, paste it into the Devpost form.
