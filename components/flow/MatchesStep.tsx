@@ -81,10 +81,23 @@ export function MatchesStep({
             <p className="mt-3 max-w-[42ch] text-[0.95rem] leading-relaxed">
               {primary.product.benefit}
             </p>
-            <p className="mt-4 border-l-4 border-botanic bg-botanic-tint px-4 py-3 text-[0.92rem] leading-relaxed">
-              <span className="font-medium">Why this match: </span>
-              {primary.reason}
-            </p>
+            <div className="mt-4 border-l-4 border-botanic bg-botanic-tint px-4 py-3 text-[0.92rem] leading-relaxed">
+              <p className="font-medium text-botanic">Why this match</p>
+              <dl className="mt-2 space-y-2">
+                <div>
+                  <dt className="font-medium">We noticed</dt>
+                  <dd>{primary.evidence.noticed}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium">This product offers</dt>
+                  <dd>{primary.evidence.offers}</dd>
+                </div>
+                <div>
+                  <dt className="font-medium">Starting point</dt>
+                  <dd>{primary.evidence.startingPoint}</dd>
+                </div>
+              </dl>
+            </div>
             {selectedProductId === primary.product.id ? (
               <p className="mt-4 text-[0.88rem] font-medium text-botanic">
                 Currently selected
@@ -117,8 +130,8 @@ export function MatchesStep({
                       {alternative.product.benefit}
                     </p>
                     <p className="mt-2 text-[0.88rem] text-stone-deep">
-                      <span className="font-medium text-ink">Why this match: </span>
-                      {alternative.reason}
+                      <span className="font-medium text-ink">Starting point: </span>
+                      {alternative.evidence.startingPoint}
                     </p>
                   </div>
                   <Action

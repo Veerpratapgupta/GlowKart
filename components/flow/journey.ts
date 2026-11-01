@@ -2,6 +2,9 @@ import type {
   AnalysisPhase,
   FlowStepId,
   SkinSnapshot,
+  ShoppingPreferences,
+  VtoPhase,
+  VtoSource,
 } from "@/lib/types";
 
 export interface JourneyState {
@@ -12,13 +15,26 @@ export interface JourneyState {
   selectedProductId: string | null;
   cartProductIds: string[];
   captureError: string | null;
+  vtoPhase: VtoPhase;
+  vtoSource: VtoSource | null;
+  vtoResultUrl: string | null;
+  vtoError: string | null;
+  preferences: ShoppingPreferences;
 }
 
 export type JourneyAction =
   | { type: "start" }
   | { type: "photoAccepted"; url: string }
   | { type: "captureFailed"; message: string }
+  | { type: "analysisCancelled" }
+  | { type: "analysisFailed"; message: string }
   | { type: "analysisReady"; snapshot: SkinSnapshot }
+  | { type: "setPreferences"; preferences: ShoppingPreferences }
+  | { type: "vtoLoading" }
+  | { type: "vtoCancelled" }
+  | { type: "vtoRecordedReady" }
+  | { type: "vtoReady"; resultUrl: string }
+  | { type: "vtoFailed"; message: string }
   | { type: "selectProduct"; productId: string }
   | { type: "addToCart"; productId: string }
   | { type: "navigate"; step: FlowStepId }
@@ -32,6 +48,11 @@ export const initialJourneyState: JourneyState = {
   selectedProductId: null,
   cartProductIds: [],
   captureError: null,
+  vtoPhase: "idle",
+  vtoSource: null,
+  vtoResultUrl: null,
+  vtoError: null,
+  preferences: { finish: "sheer", occasion: "everyday" },
 };
 
 export function canNavigate(state: JourneyState, step: FlowStepId): boolean {
@@ -43,8 +64,9 @@ export function canNavigate(state: JourneyState, step: FlowStepId): boolean {
     case "matches":
       return state.analysisPhase === "ready" && state.analysis !== null;
     case "tryOn":
-    case "result":
       return state.selectedProductId !== null;
+    case "result":
+      return state.selectedProductId !== null && state.vtoPhase === "ready";
   }
 }
 
@@ -64,9 +86,26 @@ export function journeyReducer(
         analysisPhase: "loading",
         selectedProductId: null,
         captureError: null,
+        vtoPhase: "idle",
+        vtoSource: null,
+        vtoResultUrl: null,
+        vtoError: null,
       };
     case "captureFailed":
       return { ...state, captureError: action.message };
+    case "analysisCancelled":
+      if (state.analysisPhase !== "loading") return state;
+      return {
+        ...state,
+        analysisPhase: "idle",
+        captureError: null,
+      };
+    case "analysisFailed":
+      return {
+        ...state,
+        analysisPhase: "idle",
+        captureError: action.message,
+      };
     case "analysisReady":
       if (state.analysisPhase !== "loading") return state;
       return {
@@ -76,12 +115,65 @@ export function journeyReducer(
         analysisPhase: "ready",
         captureError: null,
       };
+    case "setPreferences":
+      return { ...state, preferences: action.preferences };
     case "selectProduct":
-      if (!canNavigate(state, "tryOn")) return state;
+      if (
+        state.step !== "matches" ||
+        state.analysisPhase !== "ready" ||
+        state.analysis === null
+      ) {
+        return state;
+      }
       return {
         ...state,
         step: "tryOn",
         selectedProductId: action.productId,
+        vtoPhase: "idle",
+        vtoSource: null,
+        vtoResultUrl: null,
+        vtoError: null,
+      };
+    case "vtoLoading":
+      return {
+        ...state,
+        vtoPhase: "loading",
+        vtoSource: null,
+        vtoResultUrl: null,
+        vtoError: null,
+      };
+    case "vtoCancelled":
+      if (state.vtoPhase !== "loading") return state;
+      return {
+        ...state,
+        vtoPhase: "idle",
+        vtoSource: null,
+        vtoResultUrl: null,
+        vtoError: null,
+      };
+    case "vtoRecordedReady":
+      return {
+        ...state,
+        vtoPhase: "ready",
+        vtoSource: "recorded",
+        vtoResultUrl: null,
+        vtoError: null,
+      };
+    case "vtoReady":
+      return {
+        ...state,
+        vtoPhase: "ready",
+        vtoSource: "live",
+        vtoResultUrl: action.resultUrl,
+        vtoError: null,
+      };
+    case "vtoFailed":
+      return {
+        ...state,
+        vtoPhase: "error",
+        vtoSource: null,
+        vtoResultUrl: null,
+        vtoError: action.message,
       };
     case "addToCart":
       if (state.cartProductIds.includes(action.productId)) return state;
@@ -91,7 +183,40 @@ export function journeyReducer(
       };
     case "navigate":
       if (!canNavigate(state, action.step)) return state;
-      return { ...state, step: action.step };
+      return {
+        ...state,
+        step: action.step,
+        analysisPhase:
+          state.step === "capture" &&
+          action.step !== "capture" &&
+          state.analysisPhase === "loading"
+            ? "idle"
+            : state.analysisPhase,
+        vtoPhase:
+          state.step === "tryOn" &&
+          action.step !== "tryOn" &&
+          state.vtoPhase === "loading"
+            ? "idle"
+            : state.vtoPhase,
+        vtoSource:
+          state.step === "tryOn" &&
+          action.step !== "tryOn" &&
+          state.vtoPhase === "loading"
+            ? null
+            : state.vtoSource,
+        vtoResultUrl:
+          state.step === "tryOn" &&
+          action.step !== "tryOn" &&
+          state.vtoPhase === "loading"
+            ? null
+            : state.vtoResultUrl,
+        vtoError:
+          state.step === "tryOn" &&
+          action.step !== "tryOn" &&
+          state.vtoPhase === "loading"
+            ? null
+            : state.vtoError,
+      };
     case "restart":
       return { ...initialJourneyState };
   }

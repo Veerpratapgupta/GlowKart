@@ -17,7 +17,7 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "GlowCart",
   description:
-    "Analyze your skin, discover products that fit, and virtually try them before you buy.",
+    "Analyze your skin, discover explainable product matches, and preview shades before you buy.",
 };
 
 export default function RootLayout({

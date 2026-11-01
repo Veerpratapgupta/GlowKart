@@ -20,7 +20,8 @@ export function DiscoverStep({ onStart }: DiscoverStepProps) {
             Meet the lipstick that makes sense for you.
           </h1>
           <p className="mt-6 max-w-[44ch] text-[1.08rem] leading-relaxed text-stone-deep">
-            A quick skin-aware beauty match, then a try-on before you decide.
+            A quick skin-aware beauty match, then a shade preview before you
+            decide.
           </p>
           <div className="mt-10">
             <Action variant="botanic" onClick={onStart} className="px-8 py-3.5">

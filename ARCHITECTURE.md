@@ -1,6 +1,7 @@
 # GlowCart Architecture Proposal
 
-**Status:** Design proposal — implementation is blocked until approved.
+**Status:** Active MVP architecture — recorded and live Skin AI boundaries and
+protected live VTO are implemented; public recorded VTO uses a local simulation.
 
 ## Architecture goal
 
@@ -48,6 +49,12 @@ Keep only the minimum session data required for the current flow. Do not persist
 
 Own provider credentials, request validation, response normalization, and safe error messages.
 
+The YouCam adapter is isolated in `lib/youcam/skin-analysis.ts`. It accepts a
+validated `File`, registers and uploads it, creates and polls the task, and
+returns only the normalized `SkinSnapshot` domain shape. It never returns
+provider file IDs, task IDs, signed URLs, raw scores, or provider error bodies
+to the browser.
+
 ### Static catalog
 
 Start with a tiny local catalog because it is deterministic, fast, and easy to demo. Product records should be shaped so a future Supabase query can replace the source without changing the UI.
@@ -63,15 +70,25 @@ Names will be confirmed against official YouCam documentation before implementat
 - Missing credentials: show setup error in development; never fabricate a live response.
 - Unsupported VTO/product combination: keep the product selectable only when supported.
 - Browser camera restriction: provide upload as the reliable alternate path.
+- Client disconnect or timeout: propagate cancellation to provider requests where
+  supported, so abandoned analysis does not continue unnecessarily.
+- Provider response drift: reject incomplete or unsupported payloads instead of
+  fabricating a successful snapshot.
 
 ## Judge-access strategy
 
 The application has two explicit modes:
 
-1. **Recorded demo mode:** sanitized fixtures captured from a verified YouCam integration allow judges to test the complete flow without credentials or consuming a new inference.
+1. **Recorded demo mode:** sanitized fixtures captured from a verified YouCam integration allow judges to test the complete flow without credentials or consuming a new inference. Its shade preview reuses the uploaded selfie and selected swatch as an explicitly labeled simulation and never calls YouCam VTO.
 2. **Live mode:** server-side provider calls enabled only when deployment secrets are configured.
 
 The UI must label which mode is active. Recorded results must never be presented as fresh analysis. The README must explain how to run recorded mode and how live mode is configured without publishing secrets.
+
+Recorded mode is the default. Live mode requires the server-only
+`YOUCAM_AUTHORIZATION` value and is never selected by a browser request.
+The public deployment must remain recorded-only; live mode belongs on a
+separately protected preview/deployment environment using hosting access
+control. This prevents arbitrary visitors from spending provider credits.
 
 ## Supabase and Clerk decision
 

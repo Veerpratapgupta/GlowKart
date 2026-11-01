@@ -1,9 +1,9 @@
 export const MAX_SELFIE_BYTES = 8 * 1024 * 1024;
+export const MAX_SELFIE_REQUEST_BYTES = MAX_SELFIE_BYTES + 64 * 1024;
 
 export const ALLOWED_SELFIE_TYPES = [
   "image/jpeg",
   "image/png",
-  "image/webp",
 ] as const;
 
 export type SelfieValidationResult =
@@ -17,7 +17,7 @@ export function validateSelfieFile(file: {
   if (!(ALLOWED_SELFIE_TYPES as readonly string[]).includes(file.type)) {
     return {
       ok: false,
-      message: "That file type is not supported. Choose a JPG, PNG, or WebP image.",
+      message: "That file type is not supported. Choose a JPG or PNG image.",
     };
   }
   if (file.size === 0) {

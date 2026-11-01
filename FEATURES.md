@@ -36,6 +36,8 @@ Acceptance:
 
 **Goal:** Replace only the analysis step with a secure, server-side YouCam integration.
 
+**Progress:** Recorded-response route and browser integration complete. The server-side live adapter has passed a controlled direct application probe; recorded mode remains the safe public default.
+
 Acceptance:
 
 - Official endpoint, authentication, input, response, status, quota, and error behavior are documented in `YOUCAM_API_RESEARCH.md`.
@@ -49,21 +51,32 @@ Acceptance:
 
 **Goal:** Map analysis concerns to a small, explainable product catalog.
 
+**Progress:** Core recommendation ranking, explainable evidence, and session-only
+finish/occasion preferences are complete.
+
 Acceptance:
 
 - Recommendations are deterministic and explainable.
 - Each recommendation has name, image, price, benefit, and target concern.
 - No unsupported medical claims are made.
+- Each recommendation explains “We noticed,” “This product offers,” and “Starting point.”
+- Finish and occasion choices change ranking without requiring an account or database.
 
 ## Phase 4 — YouCam VTO
 
 **Goal:** Let the user try one selected product.
+
+**Progress:** Protected live VTO is integrated; public recorded mode uses an
+honest selfie-and-swatch simulation and never calls YouCam VTO.
 
 Acceptance:
 
 - The integration uses a real YouCam VTO capability.
 - The selected product is carried through from recommendations.
 - Upload/camera permission and API errors have a recovery path.
+- The protected live path is covered by adapter tests and renders the returned
+  temporary result image in the browser.
+- The recorded fallback is clearly labeled as a simulation, not a live render.
 
 ## Phase 5 — Submission polish
 

@@ -1,26 +1,29 @@
 import type { SkinSnapshot } from "../types";
 
 export const demoSkinSnapshot: SkinSnapshot = {
-  source: "demo",
+  source: "recorded",
   disclaimer: "Beauty guidance, not a medical diagnosis.",
   observations: [
     {
-      id: "undertone-warm",
-      title: "Warm undertone",
+      id: "acne",
+      title: "Clear-looking skin",
       detail:
-        "We noticed peach and gold tones in your skin, which often flatter coral and warm-red shades.",
+        "Your AI score was 99/100 for the acne signal. This is a beauty reference score, not a diagnosis.",
+      uiScore: 99,
     },
     {
-      id: "dryness-mild",
-      title: "Mild surface dryness",
+      id: "moisture",
+      title: "Good hydration",
       detail:
-        "We noticed slight dryness around the cheeks. Softer balm formulas usually sit more comfortably than flat mattes.",
+        "Your AI score was 72/100 for moisture. A comfortable balm or cushion texture may be a good place to start.",
+      uiScore: 72,
     },
     {
-      id: "contrast-soft",
-      title: "Soft natural contrast",
+      id: "pore",
+      title: "Some visible pore texture",
       detail:
-        "We noticed gentle contrast between your lips and skin, so a medium-coverage color tends to read naturally.",
+        "Your AI score was 61/100 for pores. Lighting and photo quality can affect this reference score.",
+      uiScore: 61,
     },
   ],
 };
