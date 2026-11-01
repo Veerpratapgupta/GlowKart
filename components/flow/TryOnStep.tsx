@@ -183,25 +183,27 @@ export function TryOnStep({
               </p>
             </div>
           )}
-          <div
-            className="absolute inset-x-0 bottom-0 px-5 pt-10 pb-5"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(36, 28, 23, 0.72), rgba(36, 28, 23, 0))",
-            }}
-          >
-            <p className="font-display text-3xl leading-none font-medium text-paper">
-              {product.shadeName}
-            </p>
+          {vtoSource !== "recorded" ? (
             <div
-              className="mt-3 h-2 w-28"
+              className="absolute inset-x-0 bottom-0 px-5 pt-10 pb-5"
               style={{
-                backgroundColor: product.swatchHex,
-                outline: `1px solid ${readableTextColor(product.swatchHex)}`,
+                background:
+                  "linear-gradient(to top, rgba(36, 28, 23, 0.72), rgba(36, 28, 23, 0))",
               }}
-              aria-hidden="true"
-            />
-          </div>
+            >
+              <p className="font-display text-3xl leading-none font-medium text-paper">
+                {product.shadeName}
+              </p>
+              <div
+                className="mt-3 h-2 w-28"
+                style={{
+                  backgroundColor: product.swatchHex,
+                  outline: `1px solid ${readableTextColor(product.swatchHex)}`,
+                }}
+                aria-hidden="true"
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="flex items-center gap-4 border border-line bg-paper px-4 py-3">
