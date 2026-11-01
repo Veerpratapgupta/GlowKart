@@ -3,11 +3,13 @@ import { DemoBadge } from "@/components/ui/DemoBadge";
 import { Notice } from "@/components/ui/Notice";
 import { ProductSwatch } from "@/components/ui/ProductSwatch";
 import { formatUsd } from "@/lib/format";
-import type { Product, Recommendation } from "@/lib/types";
+import { finishBridge } from "@/lib/recommendations";
+import type { Product, Recommendation, SkinSnapshot } from "@/lib/types";
 import { StepShell } from "./StepShell";
 
 interface MatchesStepProps {
   recommendations: Recommendation[];
+  snapshot: SkinSnapshot | null;
   selectedProductId: string | null;
   onSelect: (product: Product) => void;
   onBack: () => void;
@@ -16,12 +18,13 @@ interface MatchesStepProps {
 
 export function MatchesStep({
   recommendations,
+  snapshot,
   selectedProductId,
   onSelect,
   onBack,
   onTryAnotherPhoto,
 }: MatchesStepProps) {
-  if (recommendations.length === 0) {
+  if (recommendations.length === 0 || !snapshot) {
     return (
       <StepShell
         title="No matches yet"
@@ -58,6 +61,9 @@ export function MatchesStep({
       }
     >
       <div className="space-y-8">
+        <p className="border-l-4 border-botanic bg-botanic-tint px-4 py-3 text-[0.9rem] leading-relaxed">
+          {finishBridge(snapshot, primary.product.finish)}
+        </p>
         <section
           aria-label="Best starting point"
           className="border border-ink bg-paper"

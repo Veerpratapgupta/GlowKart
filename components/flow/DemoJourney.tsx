@@ -117,7 +117,11 @@ async function normalizeAnalysisImage(file: File): Promise<File> {
   }
 }
 
-export function DemoJourney() {
+export function DemoJourney({
+  analysisMode,
+}: {
+  analysisMode: "recorded" | "live";
+}) {
   const [state, dispatch] = useReducer(journeyReducer, initialJourneyState);
   const selfieUrlRef = useRef<string | null>(null);
   const selfieFileRef = useRef<File | null>(null);
@@ -468,6 +472,7 @@ export function DemoJourney() {
             selfieUrl={state.selfieUrl}
             error={state.captureError}
             isAnalyzing={state.analysisPhase === "loading"}
+            analysisMode={analysisMode}
             onFileAccepted={handleFileAccepted}
             onBack={() => handleNavigate("discover")}
             onStartOver={handleRestart}
@@ -480,6 +485,7 @@ export function DemoJourney() {
               selfieUrl={state.selfieUrl}
               error={state.captureError}
               isAnalyzing={false}
+              analysisMode={analysisMode}
               onFileAccepted={handleFileAccepted}
               onBack={() => handleNavigate("discover")}
               onStartOver={handleRestart}
@@ -502,6 +508,7 @@ export function DemoJourney() {
         return (
           <MatchesStep
             recommendations={recommendations}
+            snapshot={state.analysis}
             selectedProductId={state.selectedProductId}
             onSelect={handleSelectProduct}
             onBack={() => handleNavigate("snapshot")}
@@ -513,6 +520,7 @@ export function DemoJourney() {
           return (
             <MatchesStep
               recommendations={recommendations}
+              snapshot={state.analysis}
               selectedProductId={state.selectedProductId}
               onSelect={handleSelectProduct}
               onBack={() => handleNavigate("snapshot")}
@@ -545,6 +553,7 @@ export function DemoJourney() {
           return (
             <MatchesStep
               recommendations={recommendations}
+              snapshot={state.analysis}
               selectedProductId={state.selectedProductId}
               onSelect={handleSelectProduct}
               onBack={() => handleNavigate("snapshot")}

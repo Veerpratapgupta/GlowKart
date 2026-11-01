@@ -8,6 +8,7 @@ interface CaptureStepProps {
   selfieUrl: string | null;
   error: string | null;
   isAnalyzing: boolean;
+  analysisMode: "recorded" | "live";
   onFileAccepted: (file: File) => void;
   onBack: () => void;
   onStartOver: () => void;
@@ -19,6 +20,7 @@ export function CaptureStep({
   selfieUrl,
   error,
   isAnalyzing,
+  analysisMode,
   onFileAccepted,
   onBack,
   onStartOver,
@@ -29,6 +31,8 @@ export function CaptureStep({
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [demoPhotoLoading, setDemoPhotoLoading] = useState(false);
+  const [demoPhotoError, setDemoPhotoError] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -46,6 +50,34 @@ export function CaptureStep({
     const file = event.target.files?.[0];
     event.target.value = "";
     if (file) onFileAccepted(file);
+  }
+
+  async function useDemoPhoto() {
+    setDemoPhotoError(null);
+    setDemoPhotoLoading(true);
+    try {
+      const response = await fetch("/demo/demo-selfie.jpg", {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error("demo-photo-unavailable");
+      }
+      const blob = await response.blob();
+      if (!blob.type.startsWith("image/")) {
+        throw new Error("demo-photo-invalid");
+      }
+      onFileAccepted(
+        new File([blob], "glowcart-demo-selfie.jpg", {
+          type: blob.type || "image/jpeg",
+        }),
+      );
+    } catch {
+      setDemoPhotoError(
+        "The stock demo photo is unavailable right now. Upload a selfie or use the camera instead.",
+      );
+    } finally {
+      setDemoPhotoLoading(false);
+    }
   }
 
   async function openCamera() {
@@ -115,6 +147,13 @@ export function CaptureStep({
             disabled={isAnalyzing}
           >
             Use camera
+          </Action>
+          <Action
+            variant="quiet"
+            onClick={() => void useDemoPhoto()}
+            disabled={isAnalyzing || demoPhotoLoading}
+          >
+            {demoPhotoLoading ? "Loading demo photo…" : "Use demo photo"}
           </Action>
         </>
       }
@@ -197,6 +236,24 @@ export function CaptureStep({
         {cameraError ? (
           <Notice tone="info" title="Camera unavailable">
             {cameraError}
+          </Notice>
+        ) : null}
+
+        <p className="text-[0.8rem] text-stone-deep">
+          Stock demo photo · not a customer or endorser.
+        </p>
+
+        {demoPhotoError ? (
+          <Notice tone="error" title="Demo photo unavailable" alert>
+            {demoPhotoError}
+          </Notice>
+        ) : null}
+
+        {selfieUrl || isAnalyzing ? (
+          <Notice tone="info" title={analysisMode === "recorded" ? "Recorded demo" : "Live analysis"}>
+            {analysisMode === "recorded"
+              ? "This public demo replays a recorded YouCam result from our demo face. Your uploaded photo is not analyzed in recorded mode."
+              : "Live YouCam call · your photo is sent for analysis and not stored by this prototype."}
           </Notice>
         ) : null}
 

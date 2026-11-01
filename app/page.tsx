@@ -1,5 +1,8 @@
 import { DemoJourney } from "@/components/flow/DemoJourney";
 
 export default function Home() {
-  return <DemoJourney />;
+  const analysisMode =
+    process.env.GLOWCART_ANALYSIS_MODE === "live" ? "live" : "recorded";
+
+  return <DemoJourney analysisMode={analysisMode} />;
 }

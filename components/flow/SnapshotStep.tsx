@@ -1,5 +1,6 @@
 import { Action } from "@/components/ui/Action";
 import { DemoBadge } from "@/components/ui/DemoBadge";
+import { Notice } from "@/components/ui/Notice";
 import type {
   FinishPreference,
   OccasionPreference,
@@ -53,11 +54,17 @@ export function SnapshotStep({
           <figure className="inline-block border border-line bg-paper-deep p-2">
             <img
               src={selfieUrl}
-              alt="Your uploaded selfie"
+              alt={
+                snapshot.source === "recorded"
+                  ? "Uploaded photo, not analyzed in recorded mode"
+                  : "Your uploaded selfie"
+              }
               className="h-36 w-28 object-cover"
             />
             <figcaption className="mt-2 px-1 pb-1 text-[0.75rem] text-stone-deep">
-              Your photo, this session
+              {snapshot.source === "recorded"
+                ? "Uploaded photo · not analyzed in recorded mode"
+                : "Your photo, this session"}
             </figcaption>
           </figure>
         ) : null}
@@ -130,12 +137,11 @@ export function SnapshotStep({
             />
           </div>
         </div>
-        {snapshot.source === "recorded" ? (
-          <p className="text-[0.85rem] leading-relaxed text-stone-deep">
-            Recorded-response mode: this sanitized YouCam result is provided
-            without requiring a judge to supply credentials or spend credits.
-          </p>
-        ) : null}
+        <Notice tone="info" title={snapshot.source === "recorded" ? "Recorded demo" : "Live analysis"}>
+          {snapshot.source === "recorded"
+            ? "This public demo replays a recorded YouCam result from our demo face. Your uploaded photo is not analyzed in recorded mode."
+            : "Live YouCam call · your photo is sent for analysis and not stored by this prototype."}
+        </Notice>
       </div>
     </StepShell>
   );
