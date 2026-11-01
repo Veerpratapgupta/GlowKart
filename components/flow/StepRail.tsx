@@ -14,9 +14,11 @@ export function StepRail({ state, onNavigate, onStartOver }: StepRailProps) {
 
   return (
     <>
-      <header className="border-b border-line px-5 py-4 md:hidden">
+      <header className="border-b border-line bg-paper/95 px-5 py-4 backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-4">
-          <span className="font-display text-lg font-medium">GlowCart</span>
+          <span className="font-display text-xl font-medium tracking-[-0.02em]">
+            GlowCart
+          </span>
           {state.step !== "discover" ? (
             <button
               type="button"
@@ -27,11 +29,12 @@ export function StepRail({ state, onNavigate, onStartOver }: StepRailProps) {
             </button>
           ) : null}
         </div>
-        <p className="mt-3 text-[0.82rem] font-medium text-stone-deep">
-          Step {activeIndex} of {NAV_STEPS.length} · {navLabelForIndex(activeIndex)}
-        </p>
+        <div className="mt-4 flex items-center justify-between text-[0.78rem] font-medium text-stone-deep">
+          <p>Step {activeIndex} of {NAV_STEPS.length}</p>
+          <p className="text-botanic">{navLabelForIndex(activeIndex)}</p>
+        </div>
         <div
-          className="mt-2 h-px w-full bg-line"
+          className="mt-2 h-1 w-full overflow-hidden rounded-full bg-line"
           role="progressbar"
           aria-valuemin={1}
           aria-valuemax={NAV_STEPS.length}
@@ -39,17 +42,45 @@ export function StepRail({ state, onNavigate, onStartOver }: StepRailProps) {
           aria-label={`Step ${activeIndex} of ${NAV_STEPS.length}: ${navLabelForIndex(activeIndex)}`}
         >
           <div
-            className="h-px bg-botanic transition-[width] duration-300"
+            className="h-full rounded-full bg-botanic transition-[width] duration-300"
             style={{ width: `${(activeIndex / NAV_STEPS.length) * 100}%` }}
           />
         </div>
       </header>
 
-      <aside className="hidden w-56 shrink-0 border-r border-line px-6 py-8 md:flex md:flex-col">
-        <span className="font-display text-2xl font-medium">GlowCart</span>
-        <p className="mt-1 text-[0.8rem] text-stone-deep">Guest demo</p>
+      <aside className="hidden w-60 shrink-0 border-r border-line bg-paper-deep/40 px-6 py-8 md:flex md:flex-col">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span className="font-display text-2xl font-medium tracking-[-0.03em]">
+              GlowCart
+            </span>
+            <p className="mt-1 text-[0.8rem] text-stone-deep">
+              Your beauty starting point
+            </p>
+          </div>
+          <span
+            aria-label="Recorded demo mode"
+            className="mt-1 size-2 rounded-full bg-lip"
+            title="Recorded demo mode"
+          />
+        </div>
 
-        <nav aria-label="Journey steps" className="mt-10">
+        <div className="mt-8 border-y border-line py-3 text-[0.78rem] text-stone-deep">
+          <div className="flex items-center justify-between gap-3">
+            <span>Journey progress</span>
+            <span className="font-medium text-ink">
+              {activeIndex}/{NAV_STEPS.length}
+            </span>
+          </div>
+          <div className="mt-2 h-1 overflow-hidden rounded-full bg-line">
+            <div
+              className="h-full rounded-full bg-botanic transition-[width] duration-300"
+              style={{ width: `${(activeIndex / NAV_STEPS.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        <nav aria-label="Journey steps" className="mt-8">
           <ol className="space-y-5">
             {NAV_STEPS.map((item) => {
               const isActive = item.index === activeIndex;

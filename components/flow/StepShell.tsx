@@ -25,14 +25,14 @@ export function StepShell({
         <button
           type="button"
           onClick={onBack}
-          className="-ml-1 mb-8 inline-flex items-center gap-2 text-[0.9rem] text-stone-deep underline underline-offset-4 hover:text-ink"
+          className="-ml-1 mb-6 inline-flex min-h-11 items-center gap-2 px-1 text-[0.9rem] text-stone-deep underline underline-offset-4 hover:text-ink sm:mb-8"
         >
           <span aria-hidden="true">←</span>
           {backLabel}
         </button>
       ) : null}
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start lg:gap-14">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start lg:gap-14">
         <div>
           {meta ? <div className="mb-4">{meta}</div> : null}
           <h2 className="font-display text-[clamp(1.9rem,3.4vw,2.6rem)] leading-[1.08] font-medium">
@@ -47,7 +47,9 @@ export function StepShell({
         <div>{children}</div>
       </div>
 
-      <div className="mt-10 flex flex-wrap items-center gap-3">{actions}</div>
+      <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-line pt-6 sm:mt-10 sm:pt-0 sm:border-t-0">
+        {actions}
+      </div>
     </div>
   );
 }

@@ -599,7 +599,7 @@ export function DemoJourney({
       />
       <main
         id="journey-main"
-        className="flex-1 px-5 py-10 sm:px-8 md:px-12 md:py-16 lg:px-16"
+        className="flex-1 px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-16 lg:px-16"
       >
         <div
           key={state.step}

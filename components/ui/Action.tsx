@@ -23,7 +23,7 @@ export function Action({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center rounded-[2px] px-6 py-3 text-[0.95rem] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${variantClasses[variant]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center rounded-[2px] px-6 py-3 text-[0.95rem] font-medium transition-[background-color,border-color,color,transform] duration-150 hover:-translate-y-px active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 ${variantClasses[variant]} ${className}`}
       {...props}
     />
   );
