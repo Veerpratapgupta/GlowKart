@@ -14,7 +14,14 @@ import { StepRail } from "./StepRail";
 import { TryOnStep } from "./TryOnStep";
 import { sampleLipstickCatalog } from "@/lib/mock/catalog";
 import { recommendLipsticks } from "@/lib/recommendations";
-import { getAnalysisErrorMessage } from "@/lib/analysis-errors";
+import {
+  getAnalysisErrorMessage,
+  getVtoErrorMessage,
+} from "@/lib/analysis-errors";
+import {
+  downscaledDimensions,
+  MAX_ANALYSIS_IMAGE_DIMENSION,
+} from "@/lib/image-normalization";
 import { validateSelfieFile } from "@/lib/selfie-validation";
 import type {
   FlowStepId,
@@ -23,57 +30,88 @@ import type {
   ShoppingPreferences,
 } from "@/lib/types";
 
-const MIN_ANALYSIS_DIMENSION = 640;
-const MIN_FACE_FRAMING_DIMENSION = 640;
+const MAX_CLIENT_IMAGE_BYTES = 3.5 * 1024 * 1024;
+const ORIGINAL_IMAGE_MAX_BYTES = 3.2 * 1024 * 1024;
 
 async function normalizeAnalysisImage(file: File): Promise<File> {
   const objectUrl = URL.createObjectURL(file);
+  let bitmap: ImageBitmap | null = null;
   try {
-    const image = new Image();
-    image.src = objectUrl;
-    await new Promise<void>((resolve, reject) => {
-      image.onload = () => resolve();
-      image.onerror = () => reject(new Error("image-load-failed"));
+    let source: CanvasImageSource;
+    if (typeof createImageBitmap === "function") {
+      try {
+        bitmap = await createImageBitmap(file, {
+          imageOrientation: "from-image",
+        });
+        source = bitmap;
+      } catch {
+        const image = new Image();
+        image.src = objectUrl;
+        await new Promise<void>((resolve, reject) => {
+          image.onload = () => resolve();
+          image.onerror = () => reject(new Error("image-load-failed"));
+        });
+        source = image;
+      }
+    } else {
+      const image = new Image();
+      image.src = objectUrl;
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error("image-load-failed"));
+      });
+      source = image;
+    }
+
+    const sourceWidth = bitmap?.width ?? (source as HTMLImageElement).naturalWidth;
+    const sourceHeight =
+      bitmap?.height ?? (source as HTMLImageElement).naturalHeight;
+    if (
+      Math.max(sourceWidth, sourceHeight) <= MAX_ANALYSIS_IMAGE_DIMENSION &&
+      file.size <= ORIGINAL_IMAGE_MAX_BYTES
+    ) {
+      return file;
+    }
+
+    const dimensions = downscaledDimensions({
+      width: sourceWidth,
+      height: sourceHeight,
     });
-
-    const shouldReframe =
-      Math.max(image.naturalWidth, image.naturalHeight) <
-      MIN_FACE_FRAMING_DIMENSION;
-    const cropWidth = shouldReframe
-      ? Math.round(image.naturalWidth * 0.7)
-      : image.naturalWidth;
-    const cropHeight = shouldReframe
-      ? Math.round(image.naturalHeight * 0.7)
-      : image.naturalHeight;
-    const longestSide = Math.max(cropWidth, cropHeight);
-    if (!shouldReframe && longestSide >= MIN_ANALYSIS_DIMENSION) return file;
-
-    const scale = MIN_ANALYSIS_DIMENSION / longestSide;
     const canvas = document.createElement("canvas");
-    canvas.width = Math.round(cropWidth * scale);
-    canvas.height = Math.round(cropHeight * scale);
     const context = canvas.getContext("2d");
     if (!context) throw new Error("canvas-unavailable");
-    context.drawImage(
-      image,
-      (image.naturalWidth - cropWidth) / 2,
-      shouldReframe
-        ? Math.round(image.naturalHeight * 0.03)
-        : (image.naturalHeight - cropHeight) / 2,
-      cropWidth,
-      cropHeight,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    );
+    const drawingContext = context;
 
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg", 0.92),
-    );
-    if (!blob) throw new Error("image-conversion-failed");
+    async function convert(
+      width: number,
+      height: number,
+      quality: number,
+    ): Promise<Blob> {
+      canvas.width = width;
+      canvas.height = height;
+      drawingContext.clearRect(0, 0, width, height);
+      drawingContext.drawImage(source, 0, 0, width, height);
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/jpeg", quality),
+      );
+      if (!blob) throw new Error("image-conversion-failed");
+      return blob;
+    }
+
+    let blob = await convert(dimensions.width, dimensions.height, 0.85);
+    if (blob.size > MAX_CLIENT_IMAGE_BYTES) {
+      const smaller = downscaledDimensions(
+        { width: sourceWidth, height: sourceHeight },
+        1280,
+      );
+      blob = await convert(smaller.width, smaller.height, 0.8);
+    }
+    if (blob.size > MAX_CLIENT_IMAGE_BYTES) {
+      throw new Error("image-too-large");
+    }
     return new File([blob], "glowcart-selfie.jpg", { type: "image/jpeg" });
   } finally {
+    bitmap?.close();
     URL.revokeObjectURL(objectUrl);
   }
 }
@@ -161,7 +199,7 @@ export function DemoJourney() {
       analysisControllerRef.current?.abort();
       const controller = new AbortController();
       analysisControllerRef.current = controller;
-      const timeoutId = window.setTimeout(() => controller.abort(), 420_000);
+      const timeoutId = window.setTimeout(() => controller.abort(), 50_000);
       const formData = new FormData();
       formData.append("image", analysisFile);
 
@@ -322,6 +360,7 @@ export function DemoJourney() {
       const controller = new AbortController();
       vtoControllerRef.current = controller;
       dispatch({ type: "vtoLoading" });
+      const timeoutId = window.setTimeout(() => controller.abort(), 55_000);
       void fetch("/api/virtual-try-on", {
         method: "POST",
         body: (() => {
@@ -352,11 +391,20 @@ export function DemoJourney() {
           }
         })
         .catch((error: unknown) => {
-          if (requestId !== vtoRequestRef.current || controller.signal.aborted) return;
+          if (requestId !== vtoRequestRef.current) return;
           dispatch({
             type: "vtoFailed",
-            message: error instanceof Error ? error.message : "We couldn’t render this shade.",
+            message: getVtoErrorMessage(
+              error,
+              controller.signal.aborted && requestId === vtoRequestRef.current,
+            ),
           });
+        })
+        .finally(() => {
+          window.clearTimeout(timeoutId);
+          if (vtoControllerRef.current === controller) {
+            vtoControllerRef.current = null;
+          }
         });
     },
     [],

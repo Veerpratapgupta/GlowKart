@@ -7,6 +7,7 @@ import {
 import { analyzeSkin, YouCamError } from "@/lib/youcam/skin-analysis";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 function errorResponse(message: string, status: number) {
   return NextResponse.json(
@@ -16,6 +17,10 @@ function errorResponse(message: string, status: number) {
       headers: { "Cache-Control": "no-store" },
     },
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
 }
 
 export async function POST(request: Request) {
@@ -81,6 +86,12 @@ export async function POST(request: Request) {
               ? error.message
             : "Live Skin AI is temporarily unavailable.";
         return errorResponse(message, error.status);
+      }
+      if (isAbortError(error)) {
+        return errorResponse(
+          "Live Skin AI took too long to respond. Please try again.",
+          504,
+        );
       }
       return errorResponse("Live Skin AI is temporarily unavailable.", 503);
     }

@@ -4,12 +4,17 @@ import { createLipstickVto, YouCamVtoError } from "@/lib/youcam/virtual-try-on";
 import { sampleLipstickCatalog } from "@/lib/mock/catalog";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 function response(body: Record<string, string>, status: number) {
   return NextResponse.json(body, {
     status,
     headers: { "Cache-Control": "no-store" },
   });
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
 }
 
 export async function POST(request: Request) {
@@ -49,6 +54,12 @@ export async function POST(request: Request) {
       if (error.status === 422 || error.status === 504) {
         return response({ error: error.message }, error.status);
       }
+    }
+    if (isAbortError(error)) {
+      return response(
+        { error: "Live virtual try-on took too long to respond. Please try again." },
+        504,
+      );
     }
     return response({ error: "Live virtual try-on is temporarily unavailable." }, 503);
   }

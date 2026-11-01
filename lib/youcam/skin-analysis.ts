@@ -6,6 +6,8 @@ const TASK_PATH = "/s2s/v2.1/task/skin-analysis";
 const ACTIONS = ["acne", "pore", "moisture"] as const;
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLLS = 10;
+const ADAPTER_DEADLINE_MS = 45_000;
+const MAX_REQUEST_MS = 20_000;
 
 export interface SkinAnalysisOptions {
   pollIntervalMs?: number;
@@ -66,14 +68,44 @@ function headers(config: YouCamConfig, contentType = "application/json") {
   };
 }
 
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function timeoutError(): YouCamError {
+  return new YouCamError(
+    "Live Skin AI took too long to respond. Please try again.",
+    504,
+  );
+}
+
 function requestSignal(
   parentSignal: AbortSignal | undefined,
-  timeoutMs: number,
+  deadline: number,
 ): AbortSignal {
-  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+  const remaining = deadline - Date.now();
+  if (remaining <= 0) throw timeoutError();
+  const timeoutSignal = AbortSignal.timeout(Math.min(MAX_REQUEST_MS, remaining));
   return parentSignal
     ? AbortSignal.any([parentSignal, timeoutSignal])
     : timeoutSignal;
+}
+
+async function providerFetch(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  deadline: number,
+  parentSignal?: AbortSignal,
+): Promise<Response> {
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: requestSignal(parentSignal, deadline),
+    });
+  } catch (error) {
+    if (isAbortError(error)) throw timeoutError();
+    throw error;
+  }
 }
 
 async function readJson(
@@ -155,9 +187,10 @@ function uploadHeaders(value: unknown, fallbackContentType: string) {
 async function registerAndUpload(
   config: YouCamConfig,
   image: File,
+  deadline: number,
   signal?: AbortSignal,
 ): Promise<string> {
-  const metadataResponse = await fetch(`${config.baseUrl}${UPLOAD_PATH}`, {
+  const metadataResponse = await providerFetch(`${config.baseUrl}${UPLOAD_PATH}`, {
     method: "POST",
     headers: headers(config),
     body: JSON.stringify({
@@ -169,8 +202,7 @@ async function registerAndUpload(
         },
       ],
     }),
-    signal: requestSignal(signal, 20_000),
-  });
+  }, deadline, signal);
   const metadataPayload = recordFromResponse(
     await readJson(metadataResponse, "file registration"),
   );
@@ -203,12 +235,11 @@ async function registerAndUpload(
     throw new YouCamError("YouCam returned an insecure upload URL.");
   }
 
-  const uploadResponse = await fetch(uploadUrl, {
+  const uploadResponse = await providerFetch(uploadUrl, {
     method: "PUT",
     headers: uploadHeaders(uploadRequest.headers, image.type),
     body: await image.arrayBuffer(),
-    signal: requestSignal(signal, 120_000),
-  });
+  }, deadline, signal);
   if (!uploadResponse.ok) {
     throw new YouCamError(
       `YouCam image upload failed with status ${uploadResponse.status}.`,
@@ -272,11 +303,12 @@ export async function analyzeSkin(
   signal?: AbortSignal,
   options: SkinAnalysisOptions = {},
 ): Promise<SkinSnapshot> {
+  const deadline = Date.now() + ADAPTER_DEADLINE_MS;
   const pollIntervalMs = options.pollIntervalMs ?? POLL_INTERVAL_MS;
   const maxPolls = options.maxPolls ?? MAX_POLLS;
   const config = getConfig();
-  const fileId = await registerAndUpload(config, image, signal);
-  const taskResponse = await fetch(`${config.baseUrl}${TASK_PATH}`, {
+  const fileId = await registerAndUpload(config, image, deadline, signal);
+  const taskResponse = await providerFetch(`${config.baseUrl}${TASK_PATH}`, {
     method: "POST",
     headers: headers(config),
     body: JSON.stringify({
@@ -285,8 +317,7 @@ export async function analyzeSkin(
       dst_actions: [...ACTIONS],
       miniserver_args: { enable_mask_overlay: false },
     }),
-    signal: requestSignal(signal, 20_000),
-  });
+  }, deadline, signal);
   const taskPayload = recordFromResponse(
     await readJson(taskResponse, "task creation"),
   );
@@ -296,12 +327,13 @@ export async function analyzeSkin(
   }
 
   for (let poll = 0; poll < maxPolls; poll += 1) {
-    const statusResponse = await fetch(
+    const statusResponse = await providerFetch(
       `${config.baseUrl}${TASK_PATH}/${taskData.task_id}`,
       {
         headers: headers(config),
-        signal: requestSignal(signal, 20_000),
       },
+      deadline,
+      signal,
     );
     const statusPayload = recordFromResponse(
       await readJson(statusResponse, "task status"),
@@ -314,6 +346,8 @@ export async function analyzeSkin(
       const failure = taskFailure(statusData);
       throw new YouCamError(failure.message, failure.status);
     }
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw timeoutError();
     await new Promise<void>((resolve, reject) => {
       if (signal?.aborted) {
         reject(signal.reason);
@@ -326,10 +360,11 @@ export async function analyzeSkin(
       };
       timer = setTimeout(() => {
         signal?.removeEventListener("abort", onAbort);
-        resolve();
-      }, pollIntervalMs);
+        if (deadline - Date.now() <= 0) reject(timeoutError());
+        else resolve();
+      }, Math.min(pollIntervalMs, remaining));
       signal?.addEventListener("abort", onAbort, { once: true });
     });
   }
-  throw new YouCamError("YouCam analysis timed out. Please try again.", 504);
+  throw timeoutError();
 }

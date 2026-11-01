@@ -5,6 +5,8 @@ const FILE_PATH = "/s2s/v2.0/file";
 const TASK_PATH = "/s2s/v2.0/task/makeup-vto";
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLLS = 20;
+const ADAPTER_DEADLINE_MS = 50_000;
+const MAX_REQUEST_MS = 20_000;
 
 export class YouCamVtoError extends Error {
   constructor(
@@ -57,9 +59,39 @@ function apiHeaders(value: Config) {
   };
 }
 
-function signalWithTimeout(parent: AbortSignal | undefined, timeoutMs: number) {
-  const timeout = AbortSignal.timeout(timeoutMs);
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
+}
+
+function timeoutError(): YouCamVtoError {
+  return new YouCamVtoError(
+    "Live virtual try-on took too long to respond. Please try again.",
+    504,
+  );
+}
+
+function signalWithTimeout(parent: AbortSignal | undefined, deadline: number) {
+  const remaining = deadline - Date.now();
+  if (remaining <= 0) throw timeoutError();
+  const timeout = AbortSignal.timeout(Math.min(MAX_REQUEST_MS, remaining));
   return parent ? AbortSignal.any([parent, timeout]) : timeout;
+}
+
+async function providerFetch(
+  input: RequestInfo | URL,
+  init: RequestInit,
+  deadline: number,
+  parentSignal?: AbortSignal,
+): Promise<Response> {
+  try {
+    return await fetch(input, {
+      ...init,
+      signal: signalWithTimeout(parentSignal, deadline),
+    });
+  } catch (error) {
+    if (isAbortError(error)) throw timeoutError();
+    throw error;
+  }
 }
 
 async function jsonResponse(response: Response, operation: string) {
@@ -92,12 +124,28 @@ function uploadHeaders(value: unknown, fallback: string) {
     : { "Content-Type": fallback };
 }
 
+function lipEffectFor(product: Product) {
+  switch (product.finish) {
+    case "sheer":
+      return {
+        texture: "sheer" as const,
+        colorIntensity: 60,
+        transparencyIntensity: 35,
+      };
+    case "satin":
+      return { texture: "satin" as const, colorIntensity: 78 };
+    case "matte":
+      return { texture: "matte" as const, colorIntensity: 90 };
+  }
+}
+
 async function registerAndUpload(
   value: Config,
   image: File,
+  deadline: number,
   signal?: AbortSignal,
 ) {
-  const registration = await fetch(`${value.baseUrl}${FILE_PATH}`, {
+  const registration = await providerFetch(`${value.baseUrl}${FILE_PATH}`, {
     method: "POST",
     headers: apiHeaders(value),
     body: JSON.stringify({
@@ -109,8 +157,7 @@ async function registerAndUpload(
         },
       ],
     }),
-    signal: signalWithTimeout(signal, 20_000),
-  });
+  }, deadline, signal);
   const payload = record(
     await jsonResponse(registration, "file registration"),
     "YouCam VTO returned an unexpected registration response.",
@@ -133,12 +180,11 @@ async function registerAndUpload(
   if (uploadUrl.protocol !== "https:") {
     throw new YouCamVtoError("YouCam VTO returned an insecure upload URL.");
   }
-  const result = await fetch(uploadUrl, {
+  const result = await providerFetch(uploadUrl, {
     method: "PUT",
     headers: uploadHeaders(upload.headers, image.type),
     body: await image.arrayBuffer(),
-    signal: signalWithTimeout(signal, 120_000),
-  });
+  }, deadline, signal);
   if (!result.ok) throw new YouCamVtoError("YouCam VTO image upload failed.");
   return info.file_id;
 }
@@ -149,9 +195,10 @@ export async function createLipstickVto(
   signal?: AbortSignal,
   options: VtoOptions = {},
 ): Promise<string> {
+  const deadline = Date.now() + ADAPTER_DEADLINE_MS;
   const value = config();
-  const fileId = await registerAndUpload(value, image, signal);
-  const taskResponse = await fetch(`${value.baseUrl}${TASK_PATH}`, {
+  const fileId = await registerAndUpload(value, image, deadline, signal);
+  const taskResponse = await providerFetch(`${value.baseUrl}${TASK_PATH}`, {
     method: "POST",
     headers: apiHeaders(value),
     body: JSON.stringify({
@@ -165,15 +212,13 @@ export async function createLipstickVto(
           palettes: [
             {
               color: product.swatchHex,
-              texture: "matte",
-              colorIntensity: 100,
+              ...lipEffectFor(product),
             },
           ],
         },
       ],
     }),
-    signal: signalWithTimeout(signal, 20_000),
-  });
+  }, deadline, signal);
   const taskPayload = record(
     await jsonResponse(taskResponse, "task creation"),
     "YouCam VTO returned an unexpected task response.",
@@ -186,12 +231,13 @@ export async function createLipstickVto(
   const pollIntervalMs = options.pollIntervalMs ?? POLL_INTERVAL_MS;
   const maxPolls = options.maxPolls ?? MAX_POLLS;
   for (let poll = 0; poll < maxPolls; poll += 1) {
-    const statusResponse = await fetch(
+    const statusResponse = await providerFetch(
       `${value.baseUrl}${TASK_PATH}/${encodeURIComponent(taskData.task_id)}`,
       {
         headers: apiHeaders(value),
-        signal: signalWithTimeout(signal, 20_000),
       },
+      deadline,
+      signal,
     );
     const statusPayload = record(
       await jsonResponse(statusResponse, "task status"),
@@ -212,21 +258,24 @@ export async function createLipstickVto(
     if (statusData.task_status === "error") {
       throw new YouCamVtoError("YouCam VTO could not render that image.", 422);
     }
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) throw timeoutError();
     await new Promise<void>((resolve, reject) => {
       if (signal?.aborted) {
         reject(signal.reason);
         return;
       }
-      const timer = setTimeout(resolve, pollIntervalMs);
-      signal?.addEventListener(
-        "abort",
-        () => {
-          clearTimeout(timer);
-          reject(signal.reason);
-        },
-        { once: true },
-      );
+      const timer = setTimeout(() => {
+        signal?.removeEventListener("abort", onAbort);
+        if (deadline - Date.now() <= 0) reject(timeoutError());
+        else resolve();
+      }, Math.min(pollIntervalMs, remaining));
+      const onAbort = () => {
+        clearTimeout(timer);
+        reject(signal?.reason);
+      };
+      signal?.addEventListener("abort", onAbort, { once: true });
     });
   }
-  throw new YouCamVtoError("YouCam VTO took too long to respond.", 504);
+  throw timeoutError();
 }
