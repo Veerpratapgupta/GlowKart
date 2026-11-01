@@ -56,9 +56,10 @@ preview environment, with `GLOWCART_LIVE_DEPLOYMENT=protected`. The route
 fails closed when live mode is enabled without that explicit deployment marker.
 The `/api/virtual-try-on` route uses the same protected-deployment rule and
 returns a temporary HTTPS result URL without caching it.
-In recorded mode, the browser does not call that route or YouCam; it reuses the
-uploaded selfie and selected swatch for a clearly labeled simulation that is
-not a live render.
+In recorded mode, the browser still calls this app route so the public journey
+exercises the same boundary, but the route returns local demo assets and never
+calls YouCam. The selected preview is clearly labeled as a simulation, not a
+live render of the uploaded selfie.
 
 ## Development workflow
 
