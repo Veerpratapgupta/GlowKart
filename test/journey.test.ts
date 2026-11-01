@@ -184,3 +184,12 @@ test("keeps the locked stock-face disclosure copy", () => {
   );
   assert.match(demoJourney, /beforeImageUrl=\{state\.selfieUrl\}/);
 });
+
+test("keeps cart item remove controls wired in the result step", () => {
+  const resultStep = readFileSync(
+    resolve(process.cwd(), "components/flow/ResultStep.tsx"),
+    "utf8",
+  );
+  assert.match(resultStep, /onRemoveFromCart\(item\)/);
+  assert.match(resultStep, /Remove \$\{item\.shadeName\} from cart/);
+});
