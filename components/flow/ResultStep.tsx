@@ -84,7 +84,7 @@ export function ResultStep({
                   src={beforeImageUrl}
                   alt={
                     vtoSource === "recorded"
-                      ? "Stock demo face before the recorded lipstick preview"
+                      ? "Your uploaded selfie before the recorded lipstick preview"
                       : "Your selfie before lipstick"
                   }
                   className="aspect-[4/5] w-full object-cover"
@@ -111,7 +111,9 @@ export function ResultStep({
                 </div>
               )}
               <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
-                After · YouCam VTO
+                {vtoSource === "recorded"
+                  ? "After reference · YouCam VTO demo face"
+                  : "After · YouCam VTO"}
               </figcaption>
             </figure>
           </div>
@@ -119,9 +121,9 @@ export function ResultStep({
 
         {vtoSource === "recorded" ? (
           <Notice tone="info" title="Demo face notice">
-            This recorded preview uses a stock demo face, not your uploaded
-            photo. It is not a customer or endorser, and this result is not a
-            fresh personalized render.
+            Before shows your uploaded photo. The recorded after reference uses
+            a stock demo face, not your photo. It is not a customer or endorser,
+            and this result is not a fresh personalized render.
           </Notice>
         ) : null}
 

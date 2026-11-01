@@ -566,11 +566,7 @@ export function DemoJourney({
             product={selectedProduct}
             reason={selectedRecommendation?.reason ?? null}
             snapshot={state.analysis}
-            beforeImageUrl={
-              state.vtoSource === "recorded"
-                ? state.vtoDemoFaceUrl
-                : state.selfieUrl
-            }
+            beforeImageUrl={state.selfieUrl}
             resultUrl={state.vtoResultUrl}
             vtoSource={state.vtoSource}
             cartProducts={cartProducts}

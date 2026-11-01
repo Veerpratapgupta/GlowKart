@@ -152,4 +152,9 @@ test("keeps the locked stock-face disclosure copy", () => {
     "utf8",
   );
   assert.match(resultStep, /not a\s+fresh personalized render\./);
+  const demoJourney = readFileSync(
+    resolve(process.cwd(), "components/flow/DemoJourney.tsx"),
+    "utf8",
+  );
+  assert.match(demoJourney, /beforeImageUrl=\{state\.selfieUrl\}/);
 });
