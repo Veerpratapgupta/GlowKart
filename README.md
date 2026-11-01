@@ -75,7 +75,7 @@ The stock demo face and the three recorded VTO images are credited in [`public/d
 
 ## For judges (2-minute orientation)
 
-- **Run it:** `npm install && npm run dev` → open http://localhost:3000 → click **Use demo photo** → the full journey runs with zero API keys in labeled recorded mode. Deployed URL: see the Devpost submission.
+- **Run it:** `npm install && npm run dev` → open http://localhost:3000 → click **Use demo photo** → the full journey runs with zero API keys in labeled recorded mode. **Live demo (recorded mode): <https://glow-kart-sigma.vercel.app>** — same journey over HTTPS, no keys needed.
 - **Code map:** `app/api/*/route.ts` (validation, mode gating, safe errors) → `lib/youcam/skin-analysis.ts` + `lib/youcam/virtual-try-on.ts` (YouCam File API upload → task create → poll → normalize; finish-aware lip effects; never leak IDs/keys) → `lib/recommendations.ts` (deterministic, explainable ranking) → `components/flow/journey.ts` (UI state machine) + `components/flow/*` (screens) → `test/` (54 route/adapter/reducer tests). `npm run typecheck && npm test && npm run build` all pass; the build is offline-safe (self-hosted fonts).
 - **Impact:** for shoppers, GlowKart removes the "will this suit me?" hesitation before buying cosmetics online; for retailers, it turns an uninformed product view into an informed one and strengthens the discovery → try-on → cart path. Beauty-reference scores only — no medical claims.
 

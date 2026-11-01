@@ -20,11 +20,12 @@ npm run build       # passes (fonts are self-hosted, no external build-time call
 
 ## 2. Deploy (recorded mode — no env vars needed)
 
-- [ ] Push this branch to GitHub, then deploy on **Vercel** (import repo → deploy; set
-      `NEXT_PUBLIC_SITE_URL` to the deployed URL so social-image URLs are absolute;
-      recorded mode otherwise needs no env vars).
+- [x] Deployed on **Vercel**: <https://glow-kart-sigma.vercel.app> (master, recorded mode,
+      no provider env vars). Set `NEXT_PUBLIC_SITE_URL=https://glow-kart-sigma.vercel.app`
+      on the Vercel project so social-image URLs are absolute.
 - [ ] Open the HTTPS URL in a clean browser (incognito), run the full journey once with **Use demo photo**: discover → snapshot → toggle finish to Matte → matches → try best match → compare shades → keep → save look → add to cart.
-- [ ] Paste the deployed URL into the Devpost form ("Project URL") **and** the repo URL.
+- [x] Paste the deployed URL into the Devpost form ("Project URL") **and** the repo URL
+      (<https://github.com/Veerpratapgupta/GlowKart>).
 
 ## 3. Screenshots (required by the rules)
 
