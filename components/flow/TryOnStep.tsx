@@ -19,6 +19,8 @@ interface TryOnStepProps {
   vtoPhase: VtoPhase;
   vtoSource: VtoSource | null;
   vtoResultUrl: string | null;
+  recordedRenderUrl: string | null;
+  demoFaceUrl: string | null;
   vtoError: string | null;
   onRetry: () => void;
   onResultError: () => void;
@@ -36,6 +38,8 @@ export function TryOnStep({
   vtoPhase,
   vtoSource,
   vtoResultUrl,
+  recordedRenderUrl,
+  demoFaceUrl,
   vtoError,
   onRetry,
   onResultError,
@@ -77,7 +81,35 @@ export function TryOnStep({
     >
       <div className="space-y-5">
         <div className="relative overflow-hidden border border-ink bg-paper-deep">
-          {vtoPhase === "ready" && vtoSource === "recorded" ? (
+          {vtoPhase === "ready" && vtoSource === "recorded" && recordedRenderUrl ? (
+            <figure className="bg-paper-deep">
+              <div className="relative aspect-[4/5] overflow-hidden">
+                <img
+                  key={recordedRenderUrl}
+                  src={recordedRenderUrl}
+                  alt={`Recorded YouCam VTO render of the demo face wearing ${product.shadeName}`}
+                  className="h-full w-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={onResultError}
+                />
+                <span className="absolute inset-x-3 bottom-3 border border-paper/70 bg-ink/75 px-2 py-1 text-center text-[0.7rem] font-medium text-paper">
+                  Recorded YouCam VTO · demo face · not your photo
+                </span>
+              </div>
+              <figcaption className="flex items-center gap-3 border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
+                {demoFaceUrl ? (
+                  <img
+                    src={demoFaceUrl}
+                    alt="Demo face before the recorded try-on"
+                    className="h-10 w-8 border border-line object-cover"
+                  />
+                ) : null}
+                <span>
+                  Before (demo face) → After (recorded render) · {product.shadeName}
+                </span>
+              </figcaption>
+            </figure>
+          ) : vtoPhase === "ready" && vtoSource === "recorded" ? (
             <figure className="bg-paper-deep">
               {selfieUrl ? (
                 <div className="relative aspect-[4/5] overflow-hidden">
@@ -227,9 +259,10 @@ export function TryOnStep({
           </Notice>
         ) : null}
         {vtoPhase === "ready" && vtoSource === "recorded" ? (
-          <Notice tone="info" title="Recorded preview simulation">
-            This recorded preview keeps your uploaded photo on screen. It is
-            a labeled shade direction, not a fresh lipstick render.
+          <Notice tone="info" title="Recorded YouCam preview">
+            {recordedRenderUrl
+              ? "This is a recorded YouCam VTO render of our labeled demo face for this shade (see CREDITS.md). Your uploaded photo is not analyzed in recorded mode, so it is not a fresh render of your photo."
+              : "This recorded preview keeps your uploaded photo on screen. It is a labeled shade direction, not a fresh lipstick render."}
           </Notice>
         ) : null}
         {vtoPhase === "error" ? (

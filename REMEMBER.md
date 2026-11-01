@@ -214,3 +214,24 @@ Add a dated entry only after verifying a decision in the codebase or official pr
   accepted pattern (judge-access forum topic + other public entries).
 - Consequence: final steps are deploy + screenshots + video + form, tracked in
   `SUBMISSION.md`.
+
+## 2026-11-01 — Recorded VTO renders now shown as before/after
+
+- Issue: in recorded mode the result step rendered the same uploaded photo for
+  "before" and "after" (only a faint labeled swatch gradient differed), while
+  the route already returned real recorded YouCam renders (`/demo/vto-*.jpg`).
+- Fix: `DemoJourney` computes `recordedRenderUrl` via `hasRecordedRender(product.id)`
+  and passes it plus `demoFaceUrl` to `TryOnStep`/`ResultStep`. When a real
+  recorded render exists, the try-on and result screens show the recorded
+  demo-face render (labeled "Recorded YouCam VTO · demo face · not your photo")
+  with the demo-face original as "before", and the visitor's own photo is shown
+  separately as "your photo · not analyzed in recorded mode". Shades without a
+  recorded render keep the labeled selfie-and-swatch simulation. "Save this
+  look" downloads the recorded render when present.
+- Live mode is unchanged (before = your selfie, after = real YouCam render).
+- Evidence: typecheck clean, 55 tests pass (incl. new hasRecordedRender test),
+  production build passes, API smoke test returns vto renders for the original
+  three shades and the demo-face fallback for newer catalog items.
+- Note: recorded mode intentionally never calls YouCam (judge access, zero
+  credits); the fixtures are captured from real YouCam calls (public/demo/CREDITS.md).
+  Live mode requires YOUCAM_AUTHORIZATION + GLOWCART_LIVE_DEPLOYMENT=protected.

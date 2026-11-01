@@ -13,6 +13,7 @@ import { SnapshotStep } from "./SnapshotStep";
 import { StepRail } from "./StepRail";
 import { TryOnStep } from "./TryOnStep";
 import { sampleLipstickCatalog } from "@/lib/mock/catalog";
+import { hasRecordedRender } from "@/lib/mock/recorded-vto";
 import { recommendLipsticks } from "@/lib/recommendations";
 import {
   getAnalysisErrorMessage,
@@ -460,6 +461,18 @@ export function DemoJourney({
     (item) => item.product.id === state.selectedProductId,
   );
 
+  // In recorded mode the route returns a real recorded YouCam VTO render when
+  // one exists for the shade, otherwise the demo-face fallback. Only the real
+  // renders are shown as before/after; the fallback keeps the labeled
+  // selfie-and-swatch simulation so the preview never dead-ends.
+  const recordedRenderUrl =
+    state.vtoSource === "recorded" &&
+    selectedProduct !== null &&
+    state.vtoResultUrl !== null &&
+    hasRecordedRender(selectedProduct.id)
+      ? state.vtoResultUrl
+      : null;
+
   const cartProducts = state.cartProductIds
     .map((id) => sampleLipstickCatalog.find((product) => product.id === id))
     .filter((product): product is Product => product !== undefined);
@@ -546,6 +559,8 @@ export function DemoJourney({
             vtoPhase={state.vtoPhase}
             vtoSource={state.vtoSource}
             vtoResultUrl={state.vtoResultUrl}
+            recordedRenderUrl={recordedRenderUrl}
+            demoFaceUrl={state.vtoDemoFaceUrl}
             vtoError={state.vtoError}
             onRetry={() => requestVto(selectedProduct)}
             onResultError={() =>
@@ -579,6 +594,8 @@ export function DemoJourney({
             selfieUrl={state.selfieUrl}
             beforeImageUrl={state.selfieUrl}
             resultUrl={state.vtoResultUrl}
+            recordedRenderUrl={recordedRenderUrl}
+            demoFaceUrl={state.vtoDemoFaceUrl}
             vtoSource={state.vtoSource}
             cartProducts={cartProducts}
             isInCart={state.cartProductIds.includes(selectedProduct.id)}
