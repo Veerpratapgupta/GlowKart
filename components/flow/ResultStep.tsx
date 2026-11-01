@@ -57,7 +57,7 @@ export function ResultStep({
         <DemoBadge
           label={
             vtoSource === "recorded"
-              ? "Recorded YouCam VTO · demo face"
+              ? "Recorded shade direction · your photo"
               : "Live YouCam VTO"
           }
         />
@@ -140,25 +140,10 @@ export function ResultStep({
         </section>
 
         {vtoSource === "recorded" ? (
-          <Notice tone="info" title="Recorded demo reference">
+          <Notice tone="info" title="Recorded shade direction">
             This before/after direction uses your uploaded photo with a labeled
-            shade simulation. The saved YouCam reference below uses a stock
-            demo face, not your photo; it is not a customer or endorser and is
-            not a fresh personalized render.
+            shade simulation. It is not a fresh personalized render.
           </Notice>
-        ) : null}
-
-        {vtoSource === "recorded" && resultUrl ? (
-          <figure className="border border-line bg-paper p-3">
-            <img
-              src={resultUrl}
-              alt={`Recorded YouCam reference of ${product.shadeName} on a demo face`}
-              className="mx-auto aspect-[4/5] max-h-[28rem] w-full object-contain"
-            />
-            <figcaption className="px-1 pt-3 text-[0.8rem] text-stone-deep">
-              Recorded YouCam reference · demo face · not a render of your photo
-            </figcaption>
-          </figure>
         ) : null}
 
         <section aria-label="Kept product" className="border border-line bg-paper">

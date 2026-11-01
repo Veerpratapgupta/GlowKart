@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Action } from "@/components/ui/Action";
 import { DemoBadge } from "@/components/ui/DemoBadge";
 import { Notice } from "@/components/ui/Notice";
@@ -37,12 +36,6 @@ export function TryOnStep({
   onRetry,
   onResultError,
 }: TryOnStepProps) {
-  const [recordedAssetMissing, setRecordedAssetMissing] = useState(false);
-
-  useEffect(() => {
-    setRecordedAssetMissing(false);
-  }, [product.id, vtoResultUrl]);
-
   const previewReady =
     vtoPhase === "ready" &&
     Boolean(vtoResultUrl) &&
@@ -56,7 +49,7 @@ export function TryOnStep({
         <DemoBadge
           label={
             vtoSource === "recorded"
-              ? "Recorded YouCam VTO · demo face"
+              ? "Recorded shade direction · your photo"
               : vtoSource === "live"
                 ? "Live YouCam VTO"
                 : analysisMode === "recorded"
@@ -81,68 +74,34 @@ export function TryOnStep({
       <div className="space-y-5">
         <div className="relative overflow-hidden border border-ink bg-paper-deep">
           {vtoPhase === "ready" && vtoSource === "recorded" ? (
-            <div className="grid gap-px bg-line sm:grid-cols-2">
-              <figure className="bg-paper-deep">
-                {selfieUrl ? (
-                  <div className="relative aspect-[4/5] overflow-hidden">
-                    <img
-                      src={selfieUrl}
-                      alt="Your uploaded selfie with a labeled shade-direction simulation"
-                      className="h-full w-full object-cover"
-                    />
-                    <div
-                      className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 opacity-20 mix-blend-multiply"
-                      style={{
-                        background: `linear-gradient(to top, ${product.swatchHex}, transparent)`,
-                      }}
-                      aria-hidden="true"
-                    />
-                    <span className="absolute inset-x-3 bottom-3 border border-paper/70 bg-ink/75 px-2 py-1 text-center text-[0.7rem] font-medium text-paper">
-                      Shade direction only · not a lip render
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
-                    Your uploaded photo is unavailable.
-                  </div>
-                )}
-                <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
-                  Your photo · shade direction
-                </figcaption>
-              </figure>
-              <figure className="bg-paper-deep">
-                {vtoResultUrl && !recordedAssetMissing ? (
+            <figure className="bg-paper-deep">
+              {selfieUrl ? (
+                <div className="relative aspect-[4/5] overflow-hidden">
                   <img
-                    key={vtoResultUrl}
-                    src={vtoResultUrl}
-                    alt={`Recorded YouCam preview of ${product.shadeName} on a demo face`}
-                    className="aspect-[4/5] w-full object-cover"
-                    referrerPolicy="no-referrer"
-                    onError={() => setRecordedAssetMissing(true)}
+                    src={selfieUrl}
+                    alt="Your uploaded selfie with a labeled shade-direction simulation"
+                    className="h-full w-full object-cover"
                   />
-                ) : selfieUrl ? (
-                  <div className="relative aspect-[4/5] w-full overflow-hidden">
-                    <img
-                      src={selfieUrl}
-                      alt={`Your uploaded selfie paired with a ${product.shadeName} color simulation`}
-                      className="h-full w-full object-cover"
-                    />
-                    <div
-                      className="absolute inset-x-0 bottom-0 h-[46%] opacity-25 mix-blend-multiply"
-                      style={{ backgroundColor: product.swatchHex }}
-                      aria-hidden="true"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
-                    Recorded preview unavailable.
-                  </div>
-                )}
-                <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
-                  Recorded reference · demo face
-                </figcaption>
-              </figure>
-            </div>
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 opacity-20 mix-blend-multiply"
+                    style={{
+                      background: `linear-gradient(to top, ${product.swatchHex}, transparent)`,
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span className="absolute inset-x-3 bottom-3 border border-paper/70 bg-ink/75 px-2 py-1 text-center text-[0.7rem] font-medium text-paper">
+                    Your uploaded photo · shade direction
+                  </span>
+                </div>
+              ) : (
+                <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
+                  Your uploaded photo is unavailable.
+                </div>
+              )}
+              <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
+                Your photo · shade direction
+              </figcaption>
+            </figure>
           ) : vtoPhase === "ready" && vtoSource === "live" && vtoResultUrl ? (
             <img
               key={vtoResultUrl}
@@ -225,20 +184,10 @@ export function TryOnStep({
               : "YouCam is preparing a live lipstick preview."}
           </Notice>
         ) : null}
-        {vtoPhase === "ready" &&
-        vtoSource === "recorded" &&
-        !recordedAssetMissing ? (
+        {vtoPhase === "ready" && vtoSource === "recorded" ? (
           <Notice tone="info" title="Recorded preview simulation">
-            This recorded YouCam result uses the labeled demo face rather than
-            a fresh render of your photo.
-          </Notice>
-        ) : null}
-        {vtoPhase === "ready" &&
-        vtoSource === "recorded" &&
-        recordedAssetMissing ? (
-          <Notice tone="info" title="Recorded asset unavailable">
-            The saved preview is not available yet, so this labeled swatch
-            fallback is for shade direction only.
+            This recorded preview keeps your uploaded photo on screen. It is
+            a labeled shade direction, not a fresh lipstick render.
           </Notice>
         ) : null}
         {vtoPhase === "error" ? (
