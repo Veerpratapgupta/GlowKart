@@ -1,6 +1,6 @@
 # Vibe-Engineering Workflow
 
-This workflow is intentionally slower before code and faster after the design gate. It is the default agentic AI workflow for GlowCart.
+This workflow is intentionally slower before code and faster after the design gate. It is the default agentic AI workflow for GlowKart.
 
 ## Gates
 

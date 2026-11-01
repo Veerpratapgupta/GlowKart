@@ -46,13 +46,12 @@ export async function POST(request: Request) {
   if (!product) return response({ error: "That product is not available." }, 404);
   const mode = process.env.GLOWCART_ANALYSIS_MODE ?? "recorded";
   if (mode === "recorded") {
-    const resultUrl = recordedVtoResults[product.id as keyof typeof recordedVtoResults];
-    if (!resultUrl) {
-      return response(
-        { error: "Recorded virtual try-on is not configured for that product." },
-        500,
-      );
-    }
+    // Products without a dedicated recorded render fall back to the demo-face
+    // asset; the recorded UI presents a labeled selfie-and-swatch simulation
+    // either way, so the journey never dead-ends on a catalog addition.
+    const resultUrl =
+      recordedVtoResults[product.id as keyof typeof recordedVtoResults] ??
+      demoFaceUrl;
     const payload: VirtualTryOnResponse = {
       mode: "recorded",
       resultUrl,
@@ -64,7 +63,7 @@ export async function POST(request: Request) {
   }
   if (mode !== "live") {
     return response(
-      { error: "GlowCart virtual try-on mode is not configured correctly." },
+      { error: "GlowKart virtual try-on mode is not configured correctly." },
       500,
     );
   }

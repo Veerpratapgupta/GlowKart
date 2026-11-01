@@ -1,5 +1,7 @@
 # OpenCode Agent Prompts
 
+> **Status note (2026-11-01):** Phases 0–4 from `FEATURES.md` are implemented and verified (typecheck, 54 tests, production build). The prompts below are kept as the historical agent workflow; for current state see `REMEMBER.md` and `SUBMISSION.md`.
+
 Run OpenCode from the repository root. These prompts are designed for small, sequential tasks. Use one implementation prompt at a time.
 
 ## Shared preamble
@@ -7,7 +9,7 @@ Run OpenCode from the repository root. These prompts are designed for small, seq
 Copy this into every task prompt:
 
 ```text
-You are working on GlowCart, a focused YouCam Skin AI and e-commerce VTO hackathon prototype.
+You are working on GlowKart, a focused YouCam Skin AI and e-commerce VTO hackathon prototype.
 
 Before acting:
 1. Read AGENTS.md, FEATURES.md, SKILLS.md, and REMEMBER.md.
@@ -28,7 +30,7 @@ Rules:
 ## 0. Design agent — no-code gate
 
 ```text
-You are the product and UX design lead for GlowCart. Read AGENTS.md, FEATURES.md, SKILLS.md, REMEMBER.md, and WORKFLOW.md. Read the installed frontend-design skill before making visual recommendations.
+You are the product and UX design lead for GlowKart. Read AGENTS.md, FEATURES.md, SKILLS.md, REMEMBER.md, and WORKFLOW.md. Read the installed frontend-design skill before making visual recommendations.
 
 Do not write application code. Produce or refine PRODUCT_SPEC.md, UX_SPEC.md, and ARCHITECTURE.md only. Resolve the product problem, primary demo, screen jobs, visual system, states, API boundaries, security constraints, and deferred scope. Prefer a small guest-first lipstick journey over broad category coverage.
 
@@ -51,7 +53,7 @@ Implement only Phase 0 from FEATURES.md. Create the minimal app foundation neede
 Acceptance:
 - One documented development command.
 - TypeScript and production build pass.
-- A simple GlowCart landing page exists.
+- A simple GlowKart landing page exists.
 - No secrets or unnecessary services are added.
 ```
 
@@ -154,7 +156,7 @@ Report the exact memory entry added or state that no entry was justified.
 ## 2i. Loop orchestrator prompt
 
 ```text
-Run the GlowCart continuous engineering loop from WORKFLOW.md for the assigned phase:
+Run the GlowKart continuous engineering loop from WORKFLOW.md for the assigned phase:
 PROMPT → PLAN → CODE → AUDIT → FIX → DEBUG if needed → TEST → REMEMBER → HANDOFF.
 
 Use sequential agents for edits. Read-only research and audits may be parallel, but do not allow concurrent edits. Enforce the two-iteration limit and stop on repeated failures or an architecture decision. Do not claim completion until validation has passed.

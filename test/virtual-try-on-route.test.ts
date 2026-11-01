@@ -51,21 +51,45 @@ test("returns each recorded asset without provider configuration or fetches", as
     "peach-nude-cream": "/demo/vto-peach-nude.jpg",
   } as const;
 
-  for (const product of sampleLipstickCatalog) {
-    const response = await POST(requestFor(product.id));
+  for (const productId of Object.keys(expectedUrls)) {
+    const response = await POST(requestFor(productId));
     const body = await response.json();
 
     assert.equal(response.status, 200);
     assert.equal(response.headers.get("cache-control"), "no-store");
     assert.deepEqual(body, {
       mode: "recorded",
-      resultUrl: expectedUrls[product.id as keyof typeof expectedUrls],
+      resultUrl: expectedUrls[productId as keyof typeof expectedUrls],
       demoFaceUrl: "/demo/demo-selfie.jpg",
     });
   }
   assert.deepEqual(recordedVtoResults, expectedUrls);
   assert.equal(demoFaceUrl, "/demo/demo-selfie.jpg");
   assert.equal(fetchCalls, 0);
+});
+
+test("recorded mode falls back to the demo face for catalog additions", async () => {
+  delete process.env.GLOWCART_ANALYSIS_MODE;
+  delete process.env.YOUCAM_AUTHORIZATION;
+  delete process.env.YOUCAM_API_BASE_URL;
+  delete process.env.GLOWCART_LIVE_DEPLOYMENT;
+  globalThis.fetch = (async () => {
+    throw new Error("recorded mode must not call the network");
+  }) as typeof fetch;
+
+  const addition = sampleLipstickCatalog.find(
+    (product) => !(product.id in recordedVtoResults),
+  );
+  assert.ok(addition, "expected at least one product without a recorded render");
+  const response = await POST(requestFor(addition.id));
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(body, {
+    mode: "recorded",
+    resultUrl: "/demo/demo-selfie.jpg",
+    demoFaceUrl: "/demo/demo-selfie.jpg",
+  });
 });
 
 test("rejects an invalid VTO mode safely", async () => {
@@ -75,7 +99,7 @@ test("rejects an invalid VTO mode safely", async () => {
   assert.equal(response.status, 500);
   assert.equal(
     (await response.json()).error,
-    "GlowCart virtual try-on mode is not configured correctly.",
+    "GlowKart virtual try-on mode is not configured correctly.",
   );
 });
 

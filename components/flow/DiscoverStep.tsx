@@ -1,21 +1,32 @@
 import { Action } from "@/components/ui/Action";
+import { DemoBadge } from "@/components/ui/DemoBadge";
 import { readableTextColor } from "@/lib/color";
 import { sampleLipstickCatalog } from "@/lib/mock/catalog";
 
 interface DiscoverStepProps {
+  analysisMode: "recorded" | "live";
   onStart: () => void;
 }
 
-export function DiscoverStep({ onStart }: DiscoverStepProps) {
+export function DiscoverStep({ analysisMode, onStart }: DiscoverStepProps) {
   const featured = sampleLipstickCatalog.slice(0, 3);
 
   return (
     <div className="mx-auto w-full max-w-5xl">
       <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-center lg:gap-16">
         <div>
-          <p className="text-[0.9rem] font-medium text-botanic">
-            Skin-aware lipstick matching
-          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-[0.9rem] font-medium text-botanic">
+              Skin-aware lipstick matching
+            </p>
+            <DemoBadge
+              label={
+                analysisMode === "recorded"
+                  ? "Recorded demo · no API key needed"
+                  : "Live YouCam mode"
+              }
+            />
+          </div>
           <h1 className="mt-5 font-display text-[clamp(2.5rem,6vw,4rem)] leading-[1.02] font-medium">
             Meet the lipstick that makes sense for you.
           </h1>
@@ -30,6 +41,9 @@ export function DiscoverStep({ onStart }: DiscoverStepProps) {
           </div>
           <p className="mt-5 text-[0.88rem] text-stone-deep">
             No account required · Your image is used for this session
+            {analysisMode === "recorded"
+              ? " · This demo replays a recorded YouCam result"
+              : null}
           </p>
         </div>
 

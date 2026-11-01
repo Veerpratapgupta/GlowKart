@@ -1,10 +1,10 @@
-# GlowCart Product Specification
+# GlowKart Product Specification
 
-**Status:** Design proposal — implementation is blocked until this specification is approved.
+**Status:** Implemented (2026-11-01). This spec is the approved design baseline; the shipped flow lives in `components/flow/` and the README.
 
 ## One-line product
 
-GlowCart is a guest-first beauty shopping experience that helps an online cosmetics buyer move from uncertainty to confidence: analyze visible skin needs, discover a suitable lipstick, and see the result through virtual try-on before adding it to a routine.
+GlowKart is a guest-first beauty shopping experience that helps an online cosmetics buyer move from uncertainty to confidence: analyze visible skin needs, discover a suitable lipstick, and see the result through virtual try-on before adding it to a routine.
 
 ## Problem
 
@@ -15,7 +15,7 @@ The buyer has two unanswered questions:
 1. What should I choose?
 2. Will it look good on me?
 
-GlowCart answers those questions in one short journey without pretending to diagnose medical conditions.
+GlowKart answers those questions in one short journey without pretending to diagnose medical conditions.
 
 ## Target user
 
@@ -88,4 +88,4 @@ The demo succeeds when a judge can answer “yes” to all of these:
 
 ## Business value hypothesis
 
-For consumers, GlowCart reduces uncertainty before purchase. For retailers, it creates a more informed product view and a stronger path from discovery to cart. These are hypotheses for the prototype, not measured claims.
+For consumers, GlowKart reduces uncertainty before purchase. For retailers, it creates a more informed product view and a stronger path from discovery to cart. These are hypotheses for the prototype, not measured claims.

@@ -1,6 +1,6 @@
-# GlowCart UX and Visual Specification
+# GlowKart UX and Visual Specification
 
-**Status:** Design proposal — no feature implementation should begin until approved.
+**Status:** Implemented (2026-11-01) in `components/flow/` and `app/globals.css`; kept as the design reference.
 
 ## Chosen direction
 

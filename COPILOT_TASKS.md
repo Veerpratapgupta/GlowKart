@@ -1,5 +1,8 @@
 # Copilot next tasks
 
+> **Status note (2026-11-01):** historical — all phases 0–4 are implemented and
+> verified; the submission steps live in `SUBMISSION.md`. Kept as process history.
+
 Phase 4 is already in progress in the working tree. Do not edit, revert, or regenerate:
 
 - `public/demo/demo-selfie.jpg`
@@ -20,7 +23,7 @@ Work one task at a time. Do not commit. Report using the `AGENTS.md` format.
 Copy this prompt into Copilot:
 
 ```text
-You are the implementation agent for GlowCart. Before editing, read AGENTS.md, FEATURES.md, SKILLS.md, REMEMBER.md, HANDOFF.md, lib/recommendations.ts, components/flow/SnapshotStep.tsx, components/flow/MatchesStep.tsx, and test/recommendations.test.ts.
+You are the implementation agent for GlowKart. Before editing, read AGENTS.md, FEATURES.md, SKILLS.md, REMEMBER.md, HANDOFF.md, lib/recommendations.ts, components/flow/SnapshotStep.tsx, components/flow/MatchesStep.tsx, and test/recommendations.test.ts.
 
 Implement only the Phase 3 recommendation-integrity fix.
 
@@ -79,7 +82,7 @@ Do not commit. Report changed files, exact test result, and any behavior you had
 Copy this prompt into Copilot:
 
 ```text
-You are the implementation agent for GlowCart. Before editing, read AGENTS.md, HANDOFF.md, lib/analysis-errors.ts, lib/youcam/virtual-try-on.ts, lib/youcam/skin-analysis.ts, app/api/virtual-try-on/route.ts, app/api/skin-analysis/route.ts, and the related route/adapter tests.
+You are the implementation agent for GlowKart. Before editing, read AGENTS.md, HANDOFF.md, lib/analysis-errors.ts, lib/youcam/virtual-try-on.ts, lib/youcam/skin-analysis.ts, app/api/virtual-try-on/route.ts, app/api/skin-analysis/route.ts, and the related route/adapter tests.
 
 Implement only the timeout-classification fix.
 
@@ -136,7 +139,7 @@ Do not commit. Report changed files, the exact timeout test result, and any rema
 Copy this prompt into Copilot:
 
 ```text
-You are the implementation agent for GlowCart. Before editing, read AGENTS.md, HANDOFF.md, app/api/skin-analysis/route.ts, app/api/virtual-try-on/route.ts, lib/mock/recorded-analysis.ts, lib/mock/recorded-vto.ts, lib/mock/skin-snapshot.ts, components/flow/CaptureStep.tsx, components/flow/ResultStep.tsx, and the existing route/journey tests.
+You are the implementation agent for GlowKart. Before editing, read AGENTS.md, HANDOFF.md, app/api/skin-analysis/route.ts, app/api/virtual-try-on/route.ts, lib/mock/recorded-analysis.ts, lib/mock/recorded-vto.ts, lib/mock/skin-snapshot.ts, components/flow/CaptureStep.tsx, components/flow/ResultStep.tsx, and the existing route/journey tests.
 
 Implement only the recorded-mode regression and disclosure-copy task.
 

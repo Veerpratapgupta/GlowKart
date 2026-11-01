@@ -102,5 +102,5 @@ export async function POST(request: Request) {
     }
   }
 
-  return errorResponse("GlowCart analysis mode is not configured correctly.", 500);
+  return errorResponse("GlowKart analysis mode is not configured correctly.", 500);
 }

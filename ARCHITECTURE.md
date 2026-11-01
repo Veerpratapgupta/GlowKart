@@ -1,4 +1,4 @@
-# GlowCart Architecture Proposal
+# GlowKart Architecture Proposal
 
 **Status:** Active MVP architecture — recorded and live Skin AI boundaries and
 protected live VTO are implemented; public recorded VTO uses a local simulation.

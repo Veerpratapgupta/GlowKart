@@ -32,6 +32,7 @@ export function getAnalysisErrorMessage(
   if (
     error instanceof Error &&
     (error.message.startsWith("That file") ||
+      error.message.startsWith("That upload") ||
       error.message.startsWith("Please upload") ||
       error.message.startsWith("We couldn’t read"))
   ) {

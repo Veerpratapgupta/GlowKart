@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 :root {
+  --font-archivo: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-fraunces: "Fraunces Variable", Georgia, "Times New Roman", serif;
   --paper: #f2eee5;
   --paper-deep: #ebe5d9;
   --ink: #241c17;
-  --stone: #8e857a;
+  --stone: #6f675c;
   --stone-deep: #4a443c;
   --line: #d8d1c3;
   --botanic: #2e4b3c;

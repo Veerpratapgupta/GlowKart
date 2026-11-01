@@ -42,6 +42,7 @@ export type JourneyAction =
   | { type: "vtoFailed"; message: string }
   | { type: "selectProduct"; productId: string }
   | { type: "addToCart"; productId: string }
+  | { type: "removeFromCart"; productId: string }
   | { type: "navigate"; step: FlowStepId }
   | { type: "restart" };
 
@@ -126,7 +127,7 @@ export function journeyReducer(
       return { ...state, preferences: action.preferences };
     case "selectProduct":
       if (
-        state.step !== "matches" ||
+        (state.step !== "matches" && state.step !== "tryOn") ||
         state.analysisPhase !== "ready" ||
         state.analysis === null
       ) {
@@ -184,6 +185,14 @@ export function journeyReducer(
       return {
         ...state,
         cartProductIds: [...state.cartProductIds, action.productId],
+      };
+    case "removeFromCart":
+      if (!state.cartProductIds.includes(action.productId)) return state;
+      return {
+        ...state,
+        cartProductIds: state.cartProductIds.filter(
+          (id) => id !== action.productId,
+        ),
       };
     case "navigate":
       if (!canNavigate(state, action.step)) return state;

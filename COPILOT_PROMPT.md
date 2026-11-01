@@ -3,7 +3,7 @@
 Copy everything inside the block below into Copilot.
 
 ```text
-You are the implementation agent for the GlowCart hackathon project.
+You are the implementation agent for the GlowKart hackathon project.
 
 Before doing anything, read these files in this order:
 1. AGENTS.md
@@ -12,11 +12,11 @@ Before doing anything, read these files in this order:
 4. REMEMBER.md
 5. HANDOFF.md
 
-HANDOFF.md is the source of truth for the findings, locked decisions, P0/P1 fixes, asset plan, acceptance criteria, and phase prompts. Do not reinterpret or skip it.
+HANDOFF.md is a historical snapshot (its P0 items are already fixed). Current source of truth: REMEMBER.md (decisions), OFFICIAL_VERIFICATION.md (hackathon facts), SUBMISSION.md (final checklist), and the README.
 
 ## Objective
 
-Complete the GlowCart demo for the YouCam API Skin AI & eCommerce VTO Hackathon. The target journey is:
+Complete the GlowKart demo for the YouCam API Skin AI & eCommerce VTO Hackathon. The target journey is:
 selfie -> YouCam Skin AI snapshot -> skin-aware lip recommendation with a visible score-to-finish rationale -> real YouCam lip VTO -> before/after result -> prototype cart.
 
 ## Locked decisions — do not change

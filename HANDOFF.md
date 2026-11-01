@@ -1,5 +1,10 @@
-# GlowCart Hackathon Handoff — Findings, Decisions, Plan, and Copilot Prompts
+# GlowKart Hackathon Handoff — Findings, Decisions, Plan, and Copilot Prompts
 
+> **Status: HISTORICAL SNAPSHOT (2026-10-31).** The P0/P1 items listed below are
+> already fixed in the code; current state, decisions, and verification live in
+> `REMEMBER.md`, `OFFICIAL_VERIFICATION.md`, and `SUBMISSION.md`. Kept for
+> process history — do not treat its bug lists as current.
+>
 > Audience: implementation agent (Copilot).
 > Read `AGENTS.md`, `FEATURES.md`, `SKILLS.md`, and `REMEMBER.md` first.
 > Do not print, commit, or expose `.env.local` or `YOUCAM_AUTHORIZATION`.
@@ -7,7 +12,7 @@
 
 ## 1. Objective
 
-Ship a polished, judge-ready GlowCart demo for the YouCam API Skin AI & eCommerce VTO Hackathon.
+Ship a polished, judge-ready GlowKart demo for the YouCam API Skin AI & eCommerce VTO Hackathon.
 
 Target story:
 
@@ -390,7 +395,7 @@ file public/demo/demo-selfie.jpg
   Demo face: “Portrait of Brunette Asian Woman” by Darina Belonogova.
   Source: https://www.pexels.com/photo/portrait-of-brunette-asian-woman-8789240/
   License: Pexels License — https://www.pexels.com/license/
-  This person is not a customer, employee, or endorser of GlowCart.
+  This person is not a customer, employee, or endorser of GlowKart.
   ```
 
 ### 6.2 Recorded Skin AI fixture
@@ -541,7 +546,7 @@ Record a 2-minute screen capture in **live mode** using the stock demo face. No 
 
 Script:
 
-- 0:00–0:10 — “GlowCart turns one selfie into a skin-aware lip shade try-on.”
+- 0:00–0:10 — “GlowKart turns one selfie into a skin-aware lip shade try-on.”
 - 0:10–0:25 — Live mode; click “Use demo photo”; show the stock-photo label.
 - 0:25–0:40 — Skin AI scores: acne, pore, moisture; show the live badge.
 - 0:40–0:55 — Recommendation bridge: why this finish.
@@ -621,7 +626,7 @@ Publish:
 ### Master prompt
 
 ```text
-You are the implementation agent for GlowCart. Read AGENTS.md, FEATURES.md, SKILLS.md, REMEMBER.md, and HANDOFF.md first. Execute only the phase named in my next message. Do not touch .env.local, print secrets, add dependencies, or deploy before Phase 5. Use existing types and design conventions; avoid any. Run the phase validation commands. Report in the AGENTS.md format: Status, Changed, Validated, Limitations.
+You are the implementation agent for GlowKart. Read AGENTS.md, FEATURES.md, SKILLS.md, REMEMBER.md, and HANDOFF.md first. Execute only the phase named in my next message. Do not touch .env.local, print secrets, add dependencies, or deploy before Phase 5. Use existing types and design conventions; avoid any. Run the phase validation commands. Report in the AGENTS.md format: Status, Changed, Validated, Limitations.
 ```
 
 ### Phase 0 — checkpoint and secret scan

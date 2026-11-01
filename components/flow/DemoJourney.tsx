@@ -90,7 +90,9 @@ async function normalizeAnalysisImage(file: File): Promise<File> {
     ): Promise<Blob> {
       canvas.width = width;
       canvas.height = height;
-      drawingContext.clearRect(0, 0, width, height);
+      // JPEG has no alpha: fill white first so transparent PNGs don't turn black.
+      drawingContext.fillStyle = "#ffffff";
+      drawingContext.fillRect(0, 0, width, height);
       drawingContext.drawImage(source, 0, 0, width, height);
       const blob = await new Promise<Blob | null>((resolve) =>
         canvas.toBlob(resolve, "image/jpeg", quality),
@@ -465,7 +467,12 @@ export function DemoJourney({
   function renderStep() {
     switch (state.step) {
       case "discover":
-        return <DiscoverStep onStart={() => dispatch({ type: "start" })} />;
+        return (
+          <DiscoverStep
+            analysisMode={analysisMode}
+            onStart={() => dispatch({ type: "start" })}
+          />
+        );
       case "capture":
         return (
           <CaptureStep
@@ -534,6 +541,8 @@ export function DemoJourney({
             product={selectedProduct}
             analysisMode={analysisMode}
             reason={selectedRecommendation?.reason ?? null}
+            shades={recommendations}
+            onSelectShade={handleSelectProduct}
             vtoPhase={state.vtoPhase}
             vtoSource={state.vtoSource}
             vtoResultUrl={state.vtoResultUrl}
@@ -576,6 +585,9 @@ export function DemoJourney({
             onAddToCart={(product) =>
               dispatch({ type: "addToCart", productId: product.id })
             }
+            onRemoveFromCart={(product) =>
+              dispatch({ type: "removeFromCart", productId: product.id })
+            }
             onBuildAnother={() => handleNavigate("matches")}
           />
         );
@@ -592,6 +604,7 @@ export function DemoJourney({
       </a>
       <StepRail
         state={state}
+        analysisMode={analysisMode}
         onNavigate={handleNavigate}
         onStartOver={handleRestart}
       />
