@@ -34,8 +34,8 @@ npm test           # 54 unit + route-boundary tests
 2. **Capture** — click **Use demo photo** (or upload any front-facing JPG/PNG ≤ 8 MB).
 3. **Snapshot** — three plain-language observations with scores + the "not a medical diagnosis" disclaimer. Toggle **finish/occasion** to see the ranking change.
 4. **Matches** — one best starting point + two alternatives, each with "We noticed / This product offers / Starting point".
-5. **Try-on** — labeled shade preview; use **Compare shades** to flip between recommendations without going back.
-6. **Result** — before/after, the AI trail, **Save this look** (downloads a JPG), **Add to cart**, remove items, see the subtotal.
+5. **Try-on** — the recorded YouCam render of the demo face (labeled; your photo stays session-only), with **Compare shades** to flip between recommendations.
+6. **Result** — recorded before/after pair + your-photo chip, the AI trail, **Save this look** (downloads a JPG), **Add to cart**, remove items, see the subtotal.
 
 ## YouCam integration & modes
 

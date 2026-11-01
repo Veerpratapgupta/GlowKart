@@ -80,6 +80,8 @@ interface ResultStepProps {
   selfieUrl: string | null;
   beforeImageUrl: string | null;
   resultUrl: string | null;
+  recordedRenderUrl: string | null;
+  demoFaceUrl: string | null;
   vtoSource: VtoSource | null;
   cartProducts: Product[];
   isInCart: boolean;
@@ -95,10 +97,13 @@ export function ResultStep({
   selfieUrl,
   beforeImageUrl,
   resultUrl,
+  recordedRenderUrl,
+  demoFaceUrl,
   vtoSource,
   cartProducts,
   isInCart,
   onAddToCart,
+  onRemoveFromCart,
   onBuildAnother,
 }: ResultStepProps) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -128,7 +133,7 @@ export function ResultStep({
       setStatusMessage(`Saved ${product.shadeName} to your downloads.`);
     } catch {
       // Cross-origin live renders may refuse fetch/download; open instead.
-      const target = vtoSource === "recorded" ? selfieUrl : resultUrl;
+      const target = recordedRenderUrl ?? (vtoSource === "recorded" ? selfieUrl : resultUrl);
       if (target) {
         window.open(target, "_blank", "noopener");
         setStatusMessage("Opened the look in a new tab to save it.");
@@ -180,7 +185,13 @@ export function ResultStep({
         <section aria-label="Before and after preview" className="border border-ink bg-paper">
           <div className="grid gap-px bg-line sm:grid-cols-2">
             <figure className="bg-paper-deep">
-              {beforeImageUrl ? (
+              {vtoSource === "recorded" && recordedRenderUrl && demoFaceUrl ? (
+                <img
+                  src={demoFaceUrl}
+                  alt="Demo face before the recorded lipstick preview"
+                  className="aspect-[4/5] w-full object-cover"
+                />
+              ) : beforeImageUrl ? (
                 <img
                   src={beforeImageUrl}
                   alt={
@@ -196,11 +207,21 @@ export function ResultStep({
                 </div>
               )}
               <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
-                Before
+                {vtoSource === "recorded" && recordedRenderUrl
+                  ? "Before · demo face (recorded)"
+                  : "Before"}
               </figcaption>
             </figure>
             <figure className="bg-paper-deep">
-              {vtoSource === "recorded" && selfieUrl ? (
+              {vtoSource === "recorded" && recordedRenderUrl ? (
+                <img
+                  key={recordedRenderUrl}
+                  src={recordedRenderUrl}
+                  alt={`Recorded YouCam VTO render of the demo face with ${product.shadeName} lipstick`}
+                  className="aspect-[4/5] w-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : vtoSource === "recorded" && selfieUrl ? (
                 <div className="relative aspect-[4/5] overflow-hidden">
                   <img
                     src={selfieUrl}
@@ -231,7 +252,9 @@ export function ResultStep({
               )}
               <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
                 {vtoSource === "recorded"
-                  ? "After direction · your photo"
+                  ? recordedRenderUrl
+                    ? "After · recorded YouCam VTO · demo face"
+                    : "After direction · your photo"
                   : "After · YouCam VTO"}
               </figcaption>
             </figure>
@@ -239,10 +262,24 @@ export function ResultStep({
         </section>
 
         {vtoSource === "recorded" ? (
-          <Notice tone="info" title="Recorded shade direction">
-            This before/after direction uses your uploaded photo with a labeled
-            shade simulation. It is not a fresh personalized render.
+          <Notice tone="info" title="Recorded demo result">
+            {recordedRenderUrl
+              ? "This before/after is a recorded YouCam VTO render of our labeled demo face (see public/demo/CREDITS.md). It is not a fresh personalized render of your uploaded photo — recorded mode never sends your photo to YouCam."
+              : "This before/after direction uses your uploaded photo with a labeled shade simulation. It is not a fresh personalized render."}
           </Notice>
+        ) : null}
+
+        {vtoSource === "recorded" && selfieUrl ? (
+          <figure className="inline-block border border-line bg-paper-deep p-2">
+            <img
+              src={selfieUrl}
+              alt="Your uploaded photo — not analyzed in recorded mode"
+              className="h-28 w-24 object-cover"
+            />
+            <figcaption className="mt-2 px-1 pb-1 text-[0.75rem] text-stone-deep">
+              Your photo · this session only · not analyzed in recorded mode
+            </figcaption>
+          </figure>
         ) : null}
 
         <section aria-label="Kept product" className="border border-line bg-paper">

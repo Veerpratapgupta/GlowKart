@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { POST } from "../app/api/virtual-try-on/route";
-import { demoFaceUrl, recordedVtoResults } from "../lib/mock/recorded-vto";
+import { demoFaceUrl, hasRecordedRender, recordedVtoResults } from "../lib/mock/recorded-vto";
 import { sampleLipstickCatalog } from "../lib/mock/catalog";
+
 
 const originalMode = process.env.GLOWCART_ANALYSIS_MODE;
 const originalDeployment = process.env.GLOWCART_LIVE_DEPLOYMENT;
@@ -66,6 +67,17 @@ test("returns each recorded asset without provider configuration or fetches", as
   assert.deepEqual(recordedVtoResults, expectedUrls);
   assert.equal(demoFaceUrl, "/demo/demo-selfie.jpg");
   assert.equal(fetchCalls, 0);
+});
+
+test("hasRecordedRender distinguishes real renders from the demo-face fallback", () => {
+  for (const productId of Object.keys(recordedVtoResults)) {
+    assert.equal(hasRecordedRender(productId), true);
+  }
+  for (const product of sampleLipstickCatalog) {
+    if (!(product.id in recordedVtoResults)) {
+      assert.equal(hasRecordedRender(product.id), false);
+    }
+  }
 });
 
 test("recorded mode falls back to the demo face for catalog additions", async () => {

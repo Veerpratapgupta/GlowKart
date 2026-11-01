@@ -123,8 +123,8 @@ unlisted) and paste the link on the form.
 | 0:08–0:20 | Click **Use demo photo** | "One click runs the whole demo in recorded mode — the badge up top says so — no API key needed. In live mode this exact call goes to YouCam." |
 | 0:20–0:40 | Snapshot | "YouCam's **AI Skin Analysis API** runs server-side: file upload, task, poll. We normalize the scores into plain language — a beauty reference, not a diagnosis." |
 | 0:40–1:00 | Toggle finish to **Matte** → matches | "Watch the ranking change. Every pick explains itself: what we noticed, what the product offers, and the starting point." |
-| 1:00–1:20 | Try-on + Compare shades | "Now **YouCam Makeup VTO** previews the shade — sheer, satin, or matte intensity matched to the product. Compare shades side by side." |
-| 1:20–1:40 | Keep → result → Save → Add to cart | "Keep the look, download it, add it to the cart. Recorded mode is a labeled simulation of your photo; live mode renders it for real on a protected deployment." |
+| 1:00–1:20 | Try-on + Compare shades | "Now **YouCam Makeup VTO** previews the shade — here a recorded render on the demo face, clearly labeled; live mode renders your own photo. Compare shades side by side." |
+| 1:20–1:40 | Keep → result → Save → Add to cart | "Keep the look — before/after shows the recorded demo-face render, your photo stays session-only — download it, add it to the cart. Live mode renders your own photo for real on a protected deployment." |
 | 1:40–1:55 | Close on landing | "GlowKart: analyze, explain, recommend, preview, purchase. Built with the YouCam Skin AI and Makeup VTO APIs. Thanks!" |
 
 Video rules: 1–3 min, public on YouTube/Vimeo/Youku, **no copyrighted music and no

@@ -9,8 +9,8 @@ deployed URL (or `npm run dev` locally) and upload them on the submission form:
 | `02-discover-mobile.png` | Same, mobile viewport (~390 px wide) |
 | `03-capture-snapshot.png` | Snapshot step: selfie, observations with scores, disclaimer, mode notice |
 | `04-matches.png` | Matches after switching finish to **Matte**; "Why this match" panel visible |
-| `05-try-on.png` | Try-on preview with the Compare shades row |
-| `06-result-cart.png` | Result: before/after, AI trail, cart with an item + subtotal |
+| `05-try-on.png` | Try-on: recorded demo-face VTO render + before thumbnail + Compare shades row |
+| `06-result-cart.png` | Result: recorded demo-face before/after pair + your-photo chip, AI trail, cart with an item + subtotal |
 
 Automated capture (optional):
 
