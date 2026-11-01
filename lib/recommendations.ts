@@ -71,6 +71,29 @@ function scoreSummary(snapshot: SkinSnapshot): string {
     .join(" and ");
 }
 
+function finishPreferenceReason(
+  product: Product,
+  preferences: ShoppingPreferences,
+  requestedFinishAvailable: boolean,
+): string {
+  const finishMatches = product.finish === preferences.finish;
+  const occasionMatches = product.occasion === preferences.occasion;
+
+  if (!requestedFinishAvailable) {
+    return `no ${finishLabel(preferences.finish)} product is available in this catalog, so this ${finishLabel(product.finish)} ${product.occasion} option is a close available match`;
+  }
+  if (finishMatches && occasionMatches) {
+    return `this ${finishLabel(product.finish)} option matches your ${preferences.finish} finish and ${preferences.occasion} occasion`;
+  }
+  if (finishMatches) {
+    return `this ${finishLabel(product.finish)} option matches your selected finish, while its ${product.occasion} occasion is a different option`;
+  }
+  if (occasionMatches) {
+    return `this ${finishLabel(product.finish)} option matches your selected occasion, while its finish differs from your selected ${preferences.finish} finish`;
+  }
+  return `this ${finishLabel(product.finish)} ${product.occasion} option is a different finish and occasion from your selection`;
+}
+
 export function finishBridge(
   snapshot: SkinSnapshot,
   leadingFinish: FinishPreference,
@@ -85,6 +108,9 @@ export function recommendLipsticks(
 ): Recommendation[] {
   const observed = new Set(snapshot.observations.map((observation) => observation.id));
   const finishOrder = preferredFinishes(snapshot);
+  const requestedFinishAvailable = catalog.some(
+    (product) => product.finish === preferences.finish,
+  );
 
   const scored = catalog
     .map((product) => ({
@@ -92,12 +118,14 @@ export function recommendLipsticks(
       matched: product.targetConcernIds.filter((id) => observed.has(id)),
       score:
         product.targetConcernIds.filter((id) => observed.has(id)).length * 3 +
+        (product.finish === preferences.finish ? 4 : 0) +
+        (product.occasion === preferences.occasion ? 2 : 0) +
         (product.finish === finishOrder[0]
           ? 2
           : product.finish === finishOrder[1]
             ? 1
             : 0) +
-        Number(product.finish === preferences.finish),
+        (!requestedFinishAvailable && product.finish === "satin" ? 2 : 0),
     }))
 
   scored.sort(
@@ -112,7 +140,6 @@ export function recommendLipsticks(
       return observation ? observation.title.toLowerCase() : id;
     });
     const leadingFinish = finishOrder[0];
-    const occasionArticle = preferences.occasion === "everyday" ? "an" : "a";
     const scoreRationale = scoreSummary(snapshot);
     const scoreLead =
       scoreRationale === "the available Skin AI scores"
@@ -120,21 +147,25 @@ export function recommendLipsticks(
         : `Your ${scoreRationale}`;
     const finishDecision =
       entry.product.finish === leadingFinish
-        ? `we started with a ${finishLabel(leadingFinish)} finish`
-        : `we favored a ${finishLabel(leadingFinish)} finish, while this ${finishLabel(entry.product.finish)} option reflects your ${preferences.finish} preference`;
+        ? `we started with a ${finishLabel(leadingFinish)} finish, and ${finishPreferenceReason(entry.product, preferences, requestedFinishAvailable)}`
+        : finishPreferenceReason(
+            entry.product,
+            preferences,
+            requestedFinishAvailable,
+          );
 
     return {
       product: entry.product,
       isPrimary: index === 0,
       matchedConcernIds: entry.matched,
-      reason: `${scoreLead}, so ${finishDecision} for ${occasionArticle} ${preferences.occasion} look.`,
+      reason: `${scoreLead}, so ${finishDecision}.`,
       evidence: {
         noticed:
           labels.length > 0
             ? `We noticed ${joinNatural(labels)} in your beauty reference snapshot.`
             : "We used the available Skin AI scores as a neutral starting point.",
         offers: entry.product.benefit,
-        startingPoint: `${entry.product.shadeName} brings a ${finishLabel(entry.product.finish)} finish to your ${preferences.occasion} look; your selected preference is ${preferences.finish}.`,
+        startingPoint: `${entry.product.shadeName} brings a ${finishLabel(entry.product.finish)} finish to your ${entry.product.occasion} look; your selected preference is ${preferences.finish} for the ${preferences.occasion} occasion.`,
       },
     };
   });

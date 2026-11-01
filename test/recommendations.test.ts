@@ -17,7 +17,7 @@ const moistureSnapshot: SkinSnapshot = {
   ],
 };
 
-test("returns deterministic moisture matches with one primary", () => {
+test("returns deterministic sheer/everyday matches with one primary", () => {
   const recommendations = recommendLipsticks(
     moistureSnapshot,
     sampleLipstickCatalog,
@@ -25,7 +25,7 @@ test("returns deterministic moisture matches with one primary", () => {
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["soft-berry-tint", "sun-coral-balm", "peach-nude-cream"],
+    ["sun-coral-balm", "soft-berry-tint", "peach-nude-cream"],
   );
   assert.equal(recommendations[0]?.isPrimary, true);
   assert.ok(recommendations.slice(1).every((item) => !item.isPrimary));
@@ -38,33 +38,120 @@ test("returns deterministic moisture matches with one primary", () => {
   );
   assert.equal(
     recommendations[0]?.evidence.offers,
-    sampleLipstickCatalog[1]?.benefit,
+    sampleLipstickCatalog[0]?.benefit,
   );
   assert.match(
     recommendations[0]?.evidence.startingPoint ?? "",
-    /Soft Berry/,
+    /Sun Coral/,
   );
 });
 
-test("preferences change the deterministic ranking and explanation", () => {
+const demoSnapshot: SkinSnapshot = {
+  source: "recorded",
+  disclaimer: "Reference only.",
+  observations: [
+    {
+      id: "acne",
+      title: "Clear-looking skin",
+      detail: "A verified fixture observation.",
+      uiScore: 92,
+    },
+    {
+      id: "pore",
+      title: "Visible pore texture",
+      detail: "A verified fixture observation.",
+      uiScore: 80,
+    },
+    {
+      id: "moisture",
+      title: "Good hydration",
+      detail: "A verified fixture observation.",
+      uiScore: 78,
+    },
+  ],
+};
+
+test("satin/bold leads with Soft Berry", () => {
   const recommendations = recommendLipsticks(
-    moistureSnapshot,
+    demoSnapshot,
     sampleLipstickCatalog,
     { finish: "satin", occasion: "bold" },
   );
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["soft-berry-tint", "sun-coral-balm", "peach-nude-cream"],
+    ["soft-berry-tint", "peach-nude-cream", "sun-coral-balm"],
   );
   assert.equal(recommendations[0]?.isPrimary, true);
+  assert.equal(recommendations[0]?.product.finish, "satin");
   assert.match(
     recommendations[0]?.reason ?? "",
-    /satin finish for a bold look/,
+    /matches your satin finish and bold occasion/,
   );
   assert.match(
     recommendations[0]?.evidence.startingPoint ?? "",
-    /satin finish to your bold look; your selected preference is satin/,
+    /satin finish to your bold look; your selected preference is satin for the bold occasion/,
+  );
+});
+
+test("satin/everyday leads with an available satin product", () => {
+  const recommendations = recommendLipsticks(
+    demoSnapshot,
+    sampleLipstickCatalog,
+    { finish: "satin", occasion: "everyday" },
+  );
+
+  assert.deepEqual(
+    recommendations.map((item) => item.product.id),
+    ["peach-nude-cream", "soft-berry-tint", "sun-coral-balm"],
+  );
+  assert.equal(recommendations[0]?.product.finish, "satin");
+  assert.equal(recommendations[0]?.product.occasion, "everyday");
+  assert.notDeepEqual(
+    recommendations.map((item) => item.product.id),
+    ["sun-coral-balm", "peach-nude-cream", "soft-berry-tint"],
+  );
+});
+
+test("alternative reasons do not claim mismatched preferences", () => {
+  const recommendations = recommendLipsticks(
+    demoSnapshot,
+    sampleLipstickCatalog,
+    { finish: "sheer", occasion: "everyday" },
+  );
+
+  const softBerry = recommendations.find(
+    (item) => item.product.id === "soft-berry-tint",
+  );
+  assert.ok(softBerry);
+  assert.match(softBerry.reason, /different finish and occasion/);
+  assert.doesNotMatch(softBerry.reason, /reflects your sheer preference/);
+});
+
+test("unavailable matte preference names the closest available finish", () => {
+  const recommendations = recommendLipsticks(
+    demoSnapshot,
+    sampleLipstickCatalog,
+    { finish: "matte", occasion: "everyday" },
+  );
+
+  assert.deepEqual(
+    recommendations.map((item) => item.product.id),
+    ["peach-nude-cream", "sun-coral-balm", "soft-berry-tint"],
+  );
+  assert.equal(recommendations[0]?.product.finish, "satin");
+  assert.match(
+    recommendations[0]?.reason ?? "",
+    /no matte product is available in this catalog/,
+  );
+  assert.doesNotMatch(
+    recommendations[0]?.reason ?? "",
+    /matches your matte finish/,
+  );
+  assert.ok(
+    recommendations.every((item) =>
+      item.reason.includes("no matte product is available in this catalog"),
+    ),
   );
 });
 
@@ -109,7 +196,7 @@ test("returns all products for an empty observation set", () => {
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["sun-coral-balm", "soft-berry-tint", "peach-nude-cream"],
+    ["sun-coral-balm", "peach-nude-cream", "soft-berry-tint"],
   );
   assert.ok(recommendations.every((item) => item.matchedConcernIds.length === 0));
 });
@@ -155,7 +242,7 @@ test("high acne scores lead with the sheer acne-aware product", () => {
   assert.match(recommendations[0]?.reason ?? "", /acne signal is 99\/100/);
 });
 
-test("high pore scores lead with the satin pore-aware product", () => {
+test("high pore scores lead with a satin pore-aware product", () => {
   const recommendations = recommendLipsticks(
     {
       ...moistureSnapshot,
@@ -173,7 +260,7 @@ test("high pore scores lead with the satin pore-aware product", () => {
   );
 
   assert.equal(recommendations.length, 3);
-  assert.equal(recommendations[0]?.product.id, "soft-berry-tint");
+  assert.equal(recommendations[0]?.product.id, "peach-nude-cream");
   assert.equal(recommendations[0]?.product.finish, "satin");
   assert.match(recommendations[0]?.reason ?? "", /pore texture is 80\/100/);
 });

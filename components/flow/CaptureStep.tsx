@@ -240,7 +240,7 @@ export function CaptureStep({
         ) : null}
 
         <p className="text-[0.8rem] text-stone-deep">
-          Stock demo photo · not a customer or endorser.
+          Demo face · stock photo · not a customer or endorser.
         </p>
 
         {demoPhotoError ? (

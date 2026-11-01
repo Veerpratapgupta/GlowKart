@@ -156,6 +156,39 @@ test("aborts during polling without starting another provider request", async ()
   assert.equal(requestCount, 4);
 });
 
+test("preserves a caller abort reason from provider fetch", async () => {
+  process.env.YOUCAM_AUTHORIZATION = "******";
+  const controller = new AbortController();
+  const reason = new Error("caller cancelled");
+  globalThis.fetch = (async (_input, init) => {
+    controller.abort(reason);
+    throw (init?.signal as AbortSignal).reason;
+  }) as typeof fetch;
+
+  await assert.rejects(
+    analyzeSkin(
+      new File(["image"], "selfie.png", { type: "image/png" }),
+      controller.signal,
+    ),
+    (error: unknown) => error === reason,
+  );
+});
+
+test("maps a provider TimeoutError to a 504 adapter error", async () => {
+  process.env.YOUCAM_AUTHORIZATION = "******";
+  globalThis.fetch = (async () => {
+    throw new DOMException("timed out", "TimeoutError");
+  }) as typeof fetch;
+
+  await assert.rejects(
+    analyzeSkin(new File(["image"], "selfie.png", { type: "image/png" })),
+    (error: unknown) =>
+      error instanceof YouCamError &&
+      error.status === 504 &&
+      error.message === "Live Skin AI took too long to respond. Please try again.",
+  );
+});
+
 test("maps polling exhaustion to a 504 provider error", async () => {
   process.env.YOUCAM_AUTHORIZATION = "Bearer test-only";
   const responses = [

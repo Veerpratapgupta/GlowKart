@@ -68,8 +68,13 @@ function headers(config: YouCamConfig, contentType = "application/json") {
   };
 }
 
-function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === "AbortError";
+function isAbortLikeError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error.name === "AbortError" || error.name === "TimeoutError")
+  );
 }
 
 function timeoutError(): YouCamError {
@@ -82,13 +87,16 @@ function timeoutError(): YouCamError {
 function requestSignal(
   parentSignal: AbortSignal | undefined,
   deadline: number,
-): AbortSignal {
+): { signal: AbortSignal; timeoutSignal: AbortSignal } {
   const remaining = deadline - Date.now();
   if (remaining <= 0) throw timeoutError();
   const timeoutSignal = AbortSignal.timeout(Math.min(MAX_REQUEST_MS, remaining));
-  return parentSignal
-    ? AbortSignal.any([parentSignal, timeoutSignal])
-    : timeoutSignal;
+  return {
+    signal: parentSignal
+      ? AbortSignal.any([parentSignal, timeoutSignal])
+      : timeoutSignal,
+    timeoutSignal,
+  };
 }
 
 async function providerFetch(
@@ -97,13 +105,19 @@ async function providerFetch(
   deadline: number,
   parentSignal?: AbortSignal,
 ): Promise<Response> {
+  const signals = requestSignal(parentSignal, deadline);
   try {
     return await fetch(input, {
       ...init,
-      signal: requestSignal(parentSignal, deadline),
+      signal: signals.signal,
     });
   } catch (error) {
-    if (isAbortError(error)) throw timeoutError();
+    if (parentSignal?.aborted) {
+      throw parentSignal.reason ?? error;
+    }
+    if (signals.timeoutSignal.aborted || isAbortLikeError(error)) {
+      throw timeoutError();
+    }
     throw error;
   }
 }

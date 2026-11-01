@@ -113,3 +113,41 @@ test("rejects insecure result URLs", async () => {
       error.message.includes("insecure result URL"),
   );
 });
+
+test("preserves a caller abort reason from provider fetch", async () => {
+  process.env.YOUCAM_AUTHORIZATION = "******";
+  const controller = new AbortController();
+  const reason = new Error("caller cancelled");
+  globalThis.fetch = (async (_input, init) => {
+    controller.abort(reason);
+    throw (init?.signal as AbortSignal).reason;
+  }) as typeof fetch;
+
+  await assert.rejects(
+    createLipstickVto(
+      new File(["image"], "selfie.jpg", { type: "image/jpeg" }),
+      sampleLipstickCatalog[0]!,
+      controller.signal,
+    ),
+    (error: unknown) => error === reason,
+  );
+});
+
+test("maps a provider TimeoutError to a 504 adapter error", async () => {
+  process.env.YOUCAM_AUTHORIZATION = "******";
+  globalThis.fetch = (async () => {
+    throw new DOMException("timed out", "TimeoutError");
+  }) as typeof fetch;
+
+  await assert.rejects(
+    createLipstickVto(
+      new File(["image"], "selfie.jpg", { type: "image/jpeg" }),
+      sampleLipstickCatalog[0]!,
+    ),
+    (error: unknown) =>
+      error instanceof YouCamVtoError &&
+      error.status === 504 &&
+      error.message ===
+        "Live virtual try-on took too long to respond. Please try again.",
+  );
+});

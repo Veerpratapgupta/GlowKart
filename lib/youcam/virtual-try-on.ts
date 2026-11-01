@@ -59,8 +59,13 @@ function apiHeaders(value: Config) {
   };
 }
 
-function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === "AbortError";
+function isAbortLikeError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error.name === "AbortError" || error.name === "TimeoutError")
+  );
 }
 
 function timeoutError(): YouCamVtoError {
@@ -70,11 +75,17 @@ function timeoutError(): YouCamVtoError {
   );
 }
 
-function signalWithTimeout(parent: AbortSignal | undefined, deadline: number) {
+function signalWithTimeout(
+  parent: AbortSignal | undefined,
+  deadline: number,
+) {
   const remaining = deadline - Date.now();
   if (remaining <= 0) throw timeoutError();
   const timeout = AbortSignal.timeout(Math.min(MAX_REQUEST_MS, remaining));
-  return parent ? AbortSignal.any([parent, timeout]) : timeout;
+  return {
+    signal: parent ? AbortSignal.any([parent, timeout]) : timeout,
+    timeoutSignal: timeout,
+  };
 }
 
 async function providerFetch(
@@ -83,13 +94,19 @@ async function providerFetch(
   deadline: number,
   parentSignal?: AbortSignal,
 ): Promise<Response> {
+  const signals = signalWithTimeout(parentSignal, deadline);
   try {
     return await fetch(input, {
       ...init,
-      signal: signalWithTimeout(parentSignal, deadline),
+      signal: signals.signal,
     });
   } catch (error) {
-    if (isAbortError(error)) throw timeoutError();
+    if (parentSignal?.aborted) {
+      throw parentSignal.reason ?? error;
+    }
+    if (signals.timeoutSignal.aborted || isAbortLikeError(error)) {
+      throw timeoutError();
+    }
     throw error;
   }
 }

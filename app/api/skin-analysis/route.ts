@@ -19,8 +19,13 @@ function errorResponse(message: string, status: number) {
   );
 }
 
-function isAbortError(error: unknown): boolean {
-  return error instanceof Error && error.name === "AbortError";
+function isTimeoutError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error.name === "AbortError" || error.name === "TimeoutError")
+  );
 }
 
 export async function POST(request: Request) {
@@ -87,7 +92,7 @@ export async function POST(request: Request) {
             : "Live Skin AI is temporarily unavailable.";
         return errorResponse(message, error.status);
       }
-      if (isAbortError(error)) {
+      if (isTimeoutError(error)) {
         return errorResponse(
           "Live Skin AI took too long to respond. Please try again.",
           504,

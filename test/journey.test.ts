@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFileSync, statSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
 import {
   initialJourneyState,
@@ -109,4 +111,45 @@ test("cancelling VTO clears loading and recorded results unlock the keep action"
   assert.equal(recordedState.vtoSource, "recorded");
   assert.equal(recordedState.vtoResultUrl, "/demo/vto-sun-coral.jpg");
   assert.equal(recordedState.vtoDemoFaceUrl, "/demo/demo-selfie.jpg");
+});
+
+test("keeps all recorded demo images as non-empty JPEG assets", () => {
+  for (const asset of [
+    "demo-selfie.jpg",
+    "vto-sun-coral.jpg",
+    "vto-soft-berry.jpg",
+    "vto-peach-nude.jpg",
+  ]) {
+    const path = resolve(process.cwd(), "public/demo", asset);
+    assert.ok(statSync(path).size > 0, `${asset} should not be empty`);
+    const bytes = readFileSync(path);
+    assert.equal(bytes[0], 0xff, `${asset} should start with a JPEG marker`);
+    assert.equal(bytes[1], 0xd8, `${asset} should start with a JPEG marker`);
+    assert.equal(
+      bytes[bytes.length - 2],
+      0xff,
+      `${asset} should end with a JPEG marker`,
+    );
+    assert.equal(
+      bytes[bytes.length - 1],
+      0xd9,
+      `${asset} should end with a JPEG marker`,
+    );
+  }
+});
+
+test("keeps the locked stock-face disclosure copy", () => {
+  const captureStep = readFileSync(
+    resolve(process.cwd(), "components/flow/CaptureStep.tsx"),
+    "utf8",
+  );
+  assert.match(
+    captureStep,
+    /Demo face · stock photo · not a customer or endorser\./,
+  );
+  const resultStep = readFileSync(
+    resolve(process.cwd(), "components/flow/ResultStep.tsx"),
+    "utf8",
+  );
+  assert.match(resultStep, /not a\s+fresh personalized render\./);
 });

@@ -651,7 +651,7 @@ Execute Phase 3 of HANDOFF.md only. Update catalog targetConcernIds and implemen
 ### Phase 4 — demo assets and recorded fixture
 
 ```text
-Execute Phase 4 of HANDOFF.md only. Download the Pexels 8789240 stock face to public/demo/demo-selfie.jpg, inspect it, and add public/demo/CREDITS.md with the required non-endorsement notice. Create scripts/generate-demo-assets.ts that uses the existing live adapters with node --env-file=.env.local --import tsx, never prints or hardcodes the key, updates the recorded Skin AI fixture from the real stock-face result, and downloads the three VTO outputs immediately to public/demo/vto-*.jpg. Inspect each image. Verify the recorded flow locally. Do not commit .env.local. Report generated files, API outcomes, and any failed shade.
+Phase 4 is already executed in the working tree with Pexels 8789224; 8789240 failed YouCam face checks. Do not overwrite public/demo assets or lib/mock/skin-snapshot.ts. The real recorded fixture is acne 92, pore 80, moisture 78. To verify or regenerate explicitly, use public/demo/demo-selfie.jpg, the existing live adapters with node --env-file=.env.local --import tsx, and download each VTO result immediately to public/demo/vto-*.jpg. Never print or hardcode the key. Inspect each image and verify the recorded flow locally. Do not commit .env.local. Report generated files, API outcomes, and any failed shade.
 ```
 
 ### Phase 5 — Vercel recorded deployment

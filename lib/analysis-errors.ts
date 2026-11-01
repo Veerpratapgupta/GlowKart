@@ -5,13 +5,22 @@ const ANALYSIS_TIMEOUT_ERROR =
 const VTO_TIMEOUT_ERROR =
   "The virtual try-on took too long. Please choose the shade again to retry.";
 
+function isTimeoutError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error.name === "AbortError" || error.name === "TimeoutError")
+  );
+}
+
 export function getAnalysisErrorMessage(
   error: unknown,
   timedOut = false,
 ): string {
   if (
     timedOut ||
-    (error instanceof DOMException && error.name === "AbortError") ||
+    isTimeoutError(error) ||
     (error instanceof Error && error.message.toLowerCase().includes("too long"))
   ) {
     return ANALYSIS_TIMEOUT_ERROR;
@@ -34,7 +43,7 @@ export function getAnalysisErrorMessage(
 export function getVtoErrorMessage(error: unknown, timedOut = false): string {
   if (
     timedOut ||
-    (error instanceof DOMException && error.name === "AbortError") ||
+    isTimeoutError(error) ||
     (error instanceof Error && error.message.toLowerCase().includes("too long"))
   ) {
     return VTO_TIMEOUT_ERROR;

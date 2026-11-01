@@ -45,8 +45,17 @@ test.beforeEach(() => {
 
 test.afterEach(restoreMode);
 
-test("defaults to a cache-disabled recorded response", async () => {
+test("defaults to a recorded fixture without provider configuration or fetches", async () => {
   delete process.env.GLOWCART_ANALYSIS_MODE;
+  delete process.env.YOUCAM_AUTHORIZATION;
+  delete process.env.YOUCAM_API_BASE_URL;
+  delete process.env.GLOWCART_LIVE_DEPLOYMENT;
+  let fetchCalls = 0;
+  globalThis.fetch = (async () => {
+    fetchCalls += 1;
+    throw new Error("recorded mode must not call the network");
+  }) as typeof fetch;
+
   const response = await POST(requestWithImage(imageFile()));
   const body = await response.json();
 
@@ -54,9 +63,10 @@ test("defaults to a cache-disabled recorded response", async () => {
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.equal(body.mode, "recorded");
   assert.equal(body.snapshot.source, "recorded");
+  assert.equal(fetchCalls, 0);
   assert.deepEqual(
     body.snapshot.observations.map((item: { id: string }) => item.id),
-    ["acne", "moisture", "pore"],
+    ["acne", "pore", "moisture"],
   );
 });
 
@@ -159,6 +169,23 @@ test("maps live provider success and failure to safe route responses", async () 
   assert.equal(response.headers.get("cache-control"), "no-store");
   assert.equal(body.error, "Live Skin AI is temporarily unavailable.");
   assert.equal(JSON.stringify(body).includes("task-id"), false);
+});
+
+test("maps a provider TimeoutError to the safe 504 timeout response", async () => {
+  process.env.GLOWCART_ANALYSIS_MODE = "live";
+  process.env.YOUCAM_AUTHORIZATION = "******";
+  process.env.GLOWCART_LIVE_DEPLOYMENT = "protected";
+  globalThis.fetch = (async () => {
+    throw new DOMException("timed out", "TimeoutError");
+  }) as typeof fetch;
+
+  const response = await POST(requestWithImage(imageFile()));
+
+  assert.equal(response.status, 504);
+  assert.equal(
+    (await response.json()).error,
+    "Live Skin AI took too long to respond. Please try again.",
+  );
 });
 
 test("rejects malformed multipart requests", async () => {

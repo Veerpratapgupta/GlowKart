@@ -26,7 +26,7 @@ selfie -> YouCam Skin AI snapshot -> skin-aware lip recommendation with a visibl
    - No YOUCAM_AUTHORIZATION on Vercel.
    - No live YouCam calls from the public app.
 2. Live mode runs locally for asset generation and the demo video.
-3. Use the Pexels 8789240 stock demo face only. Never use the user's face in the repo or video.
+3. Use the already-selected Pexels 8789224 stock demo face only. Pexels 8789240 failed YouCam face checks; do not overwrite the selected asset. Never use the user's face in the repo or video.
 4. Label the stock face: "Demo face · stock photo · not a customer or endorser."
 5. Commit and push at Phase 0 and at the final phase. Make the repo public only at Phase 7, after the final secret scan.
 6. Do not add dependencies, auth, payments, a database, or external services.
@@ -98,11 +98,11 @@ Phase 3:
 - Add "Use demo photo" to CaptureStep in both modes, with the stock-photo notice.
 
 Phase 4:
-- Download public/demo/demo-selfie.jpg from Pexels 8789240.
-- Add public/demo/CREDITS.md with the Pexels source, license, and non-endorsement notice.
-- Use the existing live adapters with node --env-file=.env.local --import tsx. Never print or hardcode the key.
+- Phase 4 is already executed with Pexels 8789224; 8789240 failed YouCam face checks. Do not overwrite public/demo assets or lib/mock/skin-snapshot.ts.
+- The real recorded fixture is acne 92, pore 80, moisture 78. Keep the recorded wording and non-endorsement notice.
+- Use the existing live adapters with node --env-file=.env.local --import tsx only if regeneration is explicitly requested. Never print or hardcode the key.
 - Download each VTO result URL immediately; YouCam result URLs expire.
-- Generate all three: public/demo/vto-sun-coral.jpg, vto-soft-berry.jpg, vto-peach-nude.jpg.
+- If regenerating, produce all three: public/demo/vto-sun-coral.jpg, vto-soft-berry.jpg, vto-peach-nude.jpg.
 - Inspect every generated image. If a shade fails, retry once, then report the limitation.
 
 Phase 5:
