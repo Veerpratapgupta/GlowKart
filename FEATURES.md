@@ -9,7 +9,7 @@ Features are deliberately staged. Do not skip ahead because a later feature soun
 Acceptance:
 
 - The app starts with one documented command.
-- The landing page explains GlowCart in one sentence.
+- The landing page explains GlowKart in one sentence.
 - Environment variables are documented without real values.
 - A production build succeeds.
 
@@ -79,6 +79,12 @@ Acceptance:
 - The recorded fallback is clearly labeled as a simulation, not a live render.
 
 ## Phase 5 — Submission polish
+
+**Progress (2026-11-01):** code is submission-ready (typecheck, 54 tests, offline-safe
+production build, MIT license, README, OG image, mode labels on every screen).
+Remaining manual steps are tracked in `SUBMISSION.md`: deploy the recorded demo,
+capture screenshots into `docs/screenshots/`, record the 1–3 min video, and submit
+on Devpost by **Nov 2, 2026, 22:15 IST**.
 
 **Goal:** Make the prototype judge-ready.
 

@@ -1,5 +1,5 @@
 {
-  "name": "glowcart",
+  "name": "glowkart",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -15,12 +15,14 @@
     "react-dom": "19.3.1"
   },
   "devDependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.10.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.4",
     "tailwindcss": "4.3.3",
-    "typescript": "5.9.3",
-    "tsx": "4.20.6"
+    "tsx": "4.20.6",
+    "typescript": "5.9.3"
   }
 }

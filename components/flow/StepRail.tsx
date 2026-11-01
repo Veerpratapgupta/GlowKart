@@ -1,3 +1,4 @@
+import { DemoBadge } from "@/components/ui/DemoBadge";
 import { NAV_STEPS, navIndexForStep, navLabelForIndex } from "@/lib/flow-steps";
 import type { FlowStepId } from "@/lib/types";
 import type { JourneyState } from "./journey";
@@ -5,29 +6,35 @@ import { canNavigate } from "./journey";
 
 interface StepRailProps {
   state: JourneyState;
+  analysisMode: "recorded" | "live";
   onNavigate: (step: FlowStepId) => void;
   onStartOver: () => void;
 }
 
-export function StepRail({ state, onNavigate, onStartOver }: StepRailProps) {
+export function StepRail({ state, analysisMode, onNavigate, onStartOver }: StepRailProps) {
   const activeIndex = navIndexForStep(state.step);
+  const modeLabel =
+    analysisMode === "recorded" ? "Recorded demo mode" : "Live YouCam mode";
 
   return (
     <>
       <header className="border-b border-line bg-paper/95 px-5 py-4 backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-4">
           <span className="font-display text-xl font-medium tracking-[-0.02em]">
-            GlowCart
+            GlowKart
           </span>
-          {state.step !== "discover" ? (
-            <button
-              type="button"
-              onClick={onStartOver}
-              className="text-[0.85rem] text-stone-deep underline underline-offset-4 hover:text-ink"
-            >
-              Start over
-            </button>
-          ) : null}
+          <div className="flex items-center gap-3">
+            <DemoBadge label={modeLabel} />
+            {state.step !== "discover" ? (
+              <button
+                type="button"
+                onClick={onStartOver}
+                className="text-[0.85rem] text-stone-deep underline underline-offset-4 hover:text-ink"
+              >
+                Start over
+              </button>
+            ) : null}
+          </div>
         </div>
         <div className="mt-4 flex items-center justify-between text-[0.78rem] font-medium text-stone-deep">
           <p>Step {activeIndex} of {NAV_STEPS.length}</p>
@@ -52,16 +59,19 @@ export function StepRail({ state, onNavigate, onStartOver }: StepRailProps) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <span className="font-display text-2xl font-medium tracking-[-0.03em]">
-              GlowCart
+              GlowKart
             </span>
             <p className="mt-1 text-[0.8rem] text-stone-deep">
               Your beauty starting point
             </p>
+            <div className="mt-2">
+              <DemoBadge label={modeLabel} />
+            </div>
           </div>
           <span
-            aria-label="Recorded demo mode"
-            className="mt-1 size-2 rounded-full bg-lip"
-            title="Recorded demo mode"
+            aria-label={modeLabel}
+            className={`mt-1 size-2 rounded-full ${analysisMode === "recorded" ? "bg-lip" : "bg-botanic"}`}
+            title={modeLabel}
           />
         </div>
 

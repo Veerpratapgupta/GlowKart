@@ -52,7 +52,7 @@ recorded mode remains the recommended judge path.
 
 ## Live verification
 
-The GlowCart production build passed a controlled direct application probe on
+The GlowKart production build passed a controlled direct application probe on
 2026-10-31 using the protected live route and a configured server-only
 authorization value. The sanitized response was HTTP 200 with `mode: "live"`,
 `source: "live"`, and supported observations `pore` (61), `moisture` (72), and

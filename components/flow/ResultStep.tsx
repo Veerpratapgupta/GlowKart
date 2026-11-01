@@ -7,6 +7,72 @@ import { formatUsd } from "@/lib/format";
 import type { Product, SkinSnapshot, VtoSource } from "@/lib/types";
 import { StepShell } from "./StepShell";
 
+const EXPORT_WIDTH = 800;
+const EXPORT_HEIGHT = 1000;
+
+// Rebuilds the labeled recorded shade-direction preview (photo + bottom swatch
+// gradient) on a canvas so the saved file matches what the user saw.
+async function composeRecordedLook(
+  selfieUrl: string,
+  swatchHex: string,
+): Promise<Blob> {
+  const image = new Image();
+  image.src = selfieUrl;
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error("image-load-failed"));
+  });
+  const canvas = document.createElement("canvas");
+  canvas.width = EXPORT_WIDTH;
+  canvas.height = EXPORT_HEIGHT;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("canvas-unavailable");
+  // Cover-fit the photo into the 4:5 frame, same as the on-screen preview.
+  const scale = Math.max(
+    EXPORT_WIDTH / image.naturalWidth,
+    EXPORT_HEIGHT / image.naturalHeight,
+  );
+  const drawWidth = image.naturalWidth * scale;
+  const drawHeight = image.naturalHeight * scale;
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, EXPORT_WIDTH, EXPORT_HEIGHT);
+  context.drawImage(
+    image,
+    (EXPORT_WIDTH - drawWidth) / 2,
+    (EXPORT_HEIGHT - drawHeight) / 2,
+    drawWidth,
+    drawHeight,
+  );
+  const gradient = context.createLinearGradient(0, EXPORT_HEIGHT, 0, EXPORT_HEIGHT * (2 / 3));
+  gradient.addColorStop(0, swatchHex);
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  context.save();
+  context.globalAlpha = 0.2;
+  context.globalCompositeOperation = "multiply";
+  context.fillStyle = gradient;
+  context.fillRect(0, EXPORT_HEIGHT * (2 / 3), EXPORT_WIDTH, EXPORT_HEIGHT / 3);
+  context.restore();
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/jpeg", 0.92),
+  );
+  if (!blob) throw new Error("export-failed");
+  return blob;
+}
+
+async function saveBlob(blob: Blob, fileName: string): Promise<void> {
+  const url = URL.createObjectURL(blob);
+  try {
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } finally {
+    window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+}
+
 interface ResultStepProps {
   product: Product;
   reason: string | null;
@@ -18,6 +84,7 @@ interface ResultStepProps {
   cartProducts: Product[];
   isInCart: boolean;
   onAddToCart: (product: Product) => void;
+  onRemoveFromCart: (product: Product) => void;
   onBuildAnother: () => void;
 }
 
@@ -35,6 +102,7 @@ export function ResultStep({
   onBuildAnother,
 }: ResultStepProps) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const previousIsInCart = useRef(isInCart);
 
   useEffect(() => {
@@ -43,6 +111,34 @@ export function ResultStep({
     }
     previousIsInCart.current = isInCart;
   }, [isInCart, product.shadeName]);
+
+  async function handleSaveLook() {
+    setIsSaving(true);
+    try {
+      const fileName = `glowcart-${product.id}.jpg`;
+      if (vtoSource === "recorded" && selfieUrl) {
+        await saveBlob(await composeRecordedLook(selfieUrl, product.swatchHex), fileName);
+      } else if (resultUrl) {
+        const response = await fetch(resultUrl);
+        if (!response.ok) throw new Error("download-failed");
+        await saveBlob(await response.blob(), fileName);
+      } else {
+        throw new Error("no-image");
+      }
+      setStatusMessage(`Saved ${product.shadeName} to your downloads.`);
+    } catch {
+      // Cross-origin live renders may refuse fetch/download; open instead.
+      const target = vtoSource === "recorded" ? selfieUrl : resultUrl;
+      if (target) {
+        window.open(target, "_blank", "noopener");
+        setStatusMessage("Opened the look in a new tab to save it.");
+      } else {
+        setStatusMessage("We couldn’t save this look right now.");
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   const subtotal = cartProducts.reduce(
     (sum, item) => sum + item.priceUsd,
@@ -70,6 +166,9 @@ export function ResultStep({
             disabled={isInCart}
           >
             {isInCart ? "In your cart" : "Add to cart"}
+          </Action>
+          <Action variant="quiet" onClick={() => void handleSaveLook()} disabled={isSaving}>
+            {isSaving ? "Saving…" : "Save this look"}
           </Action>
           <Action variant="quiet" onClick={onBuildAnother}>
             Build another look

@@ -1,6 +1,6 @@
 # Agent Operating Rules
 
-These rules apply to every OpenCode agent working on GlowCart.
+These rules apply to every OpenCode agent working on GlowKart.
 
 ## Mission
 

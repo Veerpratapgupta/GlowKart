@@ -4,7 +4,7 @@ import { Notice } from "@/components/ui/Notice";
 import { ProductSwatch } from "@/components/ui/ProductSwatch";
 import { readableTextColor } from "@/lib/color";
 import { formatUsd } from "@/lib/format";
-import type { Product, VtoPhase, VtoSource } from "@/lib/types";
+import type { Product, Recommendation, VtoPhase, VtoSource } from "@/lib/types";
 import { StepShell } from "./StepShell";
 
 interface TryOnStepProps {
@@ -12,6 +12,8 @@ interface TryOnStepProps {
   product: Product;
   analysisMode: "recorded" | "live";
   reason: string | null;
+  shades: Recommendation[];
+  onSelectShade: (product: Product) => void;
   onKeep: () => void;
   onTryAnother: () => void;
   vtoPhase: VtoPhase;
@@ -27,6 +29,8 @@ export function TryOnStep({
   product,
   analysisMode,
   reason,
+  shades,
+  onSelectShade,
   onKeep,
   onTryAnother,
   vtoPhase,
@@ -176,6 +180,44 @@ export function TryOnStep({
             </p>
           </div>
         </div>
+
+        {shades.length > 1 ? (
+          <div className="border border-line bg-paper px-4 py-3">
+            <p className="text-[0.82rem] font-medium text-stone-deep">
+              Compare shades
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Compare shades">
+              {shades.map((shade) => {
+                const isCurrent = shade.product.id === product.id;
+                return (
+                  <button
+                    key={shade.product.id}
+                    type="button"
+                    onClick={() => onSelectShade(shade.product)}
+                    disabled={isCurrent || vtoPhase === "loading"}
+                    aria-pressed={isCurrent}
+                    aria-label={`Preview ${shade.product.shadeName}`}
+                    className={`border px-3 py-2 text-[0.85rem] font-medium transition-colors disabled:cursor-not-allowed ${
+                      isCurrent
+                        ? "border-ink bg-ink text-paper"
+                        : "border-line hover:border-ink"
+                    }`}
+                    style={
+                      isCurrent
+                        ? undefined
+                        : {
+                            backgroundColor: shade.product.swatchHex,
+                            color: readableTextColor(shade.product.swatchHex),
+                          }
+                    }
+                  >
+                    {shade.product.shadeName}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         {vtoPhase === "loading" ? (
           <Notice tone="info" title="Rendering your shade">

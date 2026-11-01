@@ -25,7 +25,7 @@ test("returns deterministic sheer/everyday matches with one primary", () => {
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["sun-coral-balm", "soft-berry-tint", "peach-nude-cream"],
+    ["sun-coral-balm", "coral-fizz-balm", "bare-fig-matte"],
   );
   assert.equal(recommendations[0]?.isPrimary, true);
   assert.ok(recommendations.slice(1).every((item) => !item.isPrimary));
@@ -80,7 +80,7 @@ test("satin/bold leads with Soft Berry", () => {
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["soft-berry-tint", "peach-nude-cream", "sun-coral-balm"],
+    ["soft-berry-tint", "peach-nude-cream", "coral-fizz-balm"],
   );
   assert.equal(recommendations[0]?.isPrimary, true);
   assert.equal(recommendations[0]?.product.finish, "satin");
@@ -109,7 +109,7 @@ test("satin/everyday leads with an available satin product", () => {
   assert.equal(recommendations[0]?.product.occasion, "everyday");
   assert.notDeepEqual(
     recommendations.map((item) => item.product.id),
-    ["sun-coral-balm", "peach-nude-cream", "soft-berry-tint"],
+    ["sun-coral-balm", "coral-fizz-balm", "peach-nude-cream"],
   );
 });
 
@@ -120,18 +120,18 @@ test("alternative reasons do not claim mismatched preferences", () => {
     { finish: "sheer", occasion: "everyday" },
   );
 
-  const softBerry = recommendations.find(
-    (item) => item.product.id === "soft-berry-tint",
+  const coralFizz = recommendations.find(
+    (item) => item.product.id === "coral-fizz-balm",
   );
-  assert.ok(softBerry);
-  assert.match(softBerry.reason, /different finish and occasion/);
-  assert.doesNotMatch(softBerry.reason, /reflects your sheer preference/);
+  assert.ok(coralFizz);
+  assert.match(coralFizz.reason, /bold occasion is a different option/);
+  assert.doesNotMatch(coralFizz.reason, /different finish and occasion/);
 });
 
 test("unavailable matte preference names the closest available finish", () => {
   const recommendations = recommendLipsticks(
     demoSnapshot,
-    sampleLipstickCatalog,
+    sampleLipstickCatalog.filter((product) => product.finish !== "matte"),
     { finish: "matte", occasion: "everyday" },
   );
 
@@ -152,6 +152,22 @@ test("unavailable matte preference names the closest available finish", () => {
     recommendations.every((item) =>
       item.reason.includes("no matte product is available in this catalog"),
     ),
+  );
+});
+
+test("matte preference surfaces matte products in the matches", () => {
+  const recommendations = recommendLipsticks(
+    demoSnapshot,
+    sampleLipstickCatalog,
+    { finish: "matte", occasion: "everyday" },
+  );
+
+  assert.ok(
+    recommendations.some((item) => item.product.finish === "matte"),
+    "expected at least one matte product in the top three",
+  );
+  assert.ok(
+    recommendations.every((item) => !item.reason.includes("no matte product")),
   );
 });
 
@@ -196,7 +212,7 @@ test("returns all products for an empty observation set", () => {
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["sun-coral-balm", "peach-nude-cream", "soft-berry-tint"],
+    ["sun-coral-balm", "coral-fizz-balm", "peach-nude-cream"],
   );
   assert.ok(recommendations.every((item) => item.matchedConcernIds.length === 0));
 });
@@ -213,9 +229,13 @@ test("duplicate observations do not inflate a product match", () => {
     sampleLipstickCatalog,
   );
 
-  assert.deepEqual(
-    recommendations.map((item) => item.matchedConcernIds),
-    [["moisture"], ["moisture"], []],
+  assert.equal(recommendations.length, 3);
+  assert.deepEqual(recommendations[0]?.matchedConcernIds, ["moisture"]);
+  assert.ok(
+    recommendations.every(
+      (item) =>
+        item.matchedConcernIds.filter((id) => id === "moisture").length <= 1,
+    ),
   );
 });
 
@@ -237,7 +257,7 @@ test("high acne scores lead with the sheer acne-aware product", () => {
 
   assert.deepEqual(
     recommendations.map((item) => item.product.id),
-    ["sun-coral-balm", "peach-nude-cream", "soft-berry-tint"],
+    ["sun-coral-balm", "coral-fizz-balm", "peach-nude-cream"],
   );
   assert.match(recommendations[0]?.reason ?? "", /acne signal is 99\/100/);
 });

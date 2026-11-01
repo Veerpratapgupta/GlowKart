@@ -136,6 +136,13 @@ export function CaptureStep({
         <>
           <Action
             variant="botanic"
+            onClick={() => void useDemoPhoto()}
+            disabled={isAnalyzing || demoPhotoLoading}
+          >
+            {demoPhotoLoading ? "Loading demo photo…" : "Use demo photo"}
+          </Action>
+          <Action
+            variant="quiet"
             onClick={() => uploadInputRef.current?.click()}
             disabled={isAnalyzing}
           >
@@ -147,13 +154,6 @@ export function CaptureStep({
             disabled={isAnalyzing}
           >
             Use camera
-          </Action>
-          <Action
-            variant="quiet"
-            onClick={() => void useDemoPhoto()}
-            disabled={isAnalyzing || demoPhotoLoading}
-          >
-            {demoPhotoLoading ? "Loading demo photo…" : "Use demo photo"}
           </Action>
         </>
       }
@@ -185,7 +185,7 @@ export function CaptureStep({
               muted
               playsInline
               aria-label="Camera preview"
-              className="aspect-[4/5] w-full object-cover"
+              className="aspect-[4/5] w-full -scale-x-100 object-cover"
             />
             <div className="flex flex-wrap gap-3">
               <Action variant="botanic" onClick={captureCameraPhoto}>

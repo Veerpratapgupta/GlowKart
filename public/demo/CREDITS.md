@@ -21,3 +21,11 @@ The Pexels license permits free use and modification, does not require attributi
 - Use: recorded demo previews only. They are not fresh renders of a visitor’s photo.
 
 The public demo labels these results as recorded YouCam VTO on a demo face.
+
+## Catalog additions without a dedicated recorded render
+
+Products added after the initial three shades have no per-shade recorded VTO
+image. In recorded mode the API falls back to `demo-selfie.jpg` for their
+`resultUrl`, and the UI always presents the visitor's own uploaded photo with a
+labeled shade-direction simulation, so no fixture is ever presented as a fresh
+render of a visitor's photo.

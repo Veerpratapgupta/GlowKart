@@ -116,7 +116,7 @@ test("fails closed for an unknown analysis mode", async () => {
   const response = await POST(requestWithImage(imageFile()));
 
   assert.equal(response.status, 500);
-  assert.equal((await response.json()).error, "GlowCart analysis mode is not configured correctly.");
+  assert.equal((await response.json()).error, "GlowKart analysis mode is not configured correctly.");
 });
 
 test("fails closed when live mode is not on a protected deployment", async () => {

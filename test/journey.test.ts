@@ -48,6 +48,32 @@ test("selecting a match enters the shade preview", () => {
   );
 });
 
+test("selecting another shade from the preview re-enters the preview", () => {
+  const readyState = journeyReducer(
+    journeyReducer(
+      journeyReducer(initialJourneyState, { type: "start" }),
+      { type: "photoAccepted", url: "blob:photo" },
+    ),
+    { type: "analysisReady", snapshot },
+  );
+  const matchesState = journeyReducer(readyState, {
+    type: "navigate",
+    step: "matches",
+  });
+  const previewState = journeyReducer(matchesState, {
+    type: "selectProduct",
+    productId: "sun-coral-balm",
+  });
+  const switchedState = journeyReducer(previewState, {
+    type: "selectProduct",
+    productId: "soft-berry-tint",
+  });
+
+  assert.equal(switchedState.step, "tryOn");
+  assert.equal(switchedState.selectedProductId, "soft-berry-tint");
+  assert.equal(switchedState.vtoPhase, "idle");
+});
+
 test("cancelling analysis clears loading before navigating away", () => {
   const loadingState = journeyReducer(
     journeyReducer(initialJourneyState, { type: "start" }),
