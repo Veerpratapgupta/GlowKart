@@ -361,9 +361,22 @@ export function ResultStep({
                         {item.brand} · {item.name}
                       </p>
                     </div>
-                    <p className="shrink-0 text-[0.92rem]">
-                      {formatUsd(item.priceUsd)}
-                    </p>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <p className="text-[0.92rem]">{formatUsd(item.priceUsd)}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onRemoveFromCart(item);
+                          setStatusMessage(
+                            `${item.shadeName} was removed from your prototype cart.`,
+                          );
+                        }}
+                        aria-label={`Remove ${item.shadeName} from cart`}
+                        className="flex size-8 items-center justify-center border border-line text-stone-deep transition-colors hover:border-lip-deep hover:text-lip-deep"
+                      >
+                        <span aria-hidden="true">×</span>
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
