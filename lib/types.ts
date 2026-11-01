@@ -25,8 +25,9 @@ export interface SkinAnalysisResponse {
 }
 
 export interface VirtualTryOnResponse {
-  mode: "live";
+  mode: VtoSource;
   resultUrl: string;
+  demoFaceUrl?: string;
 }
 
 export interface Product {

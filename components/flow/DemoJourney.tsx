@@ -28,6 +28,7 @@ import type {
   Product,
   SkinAnalysisResponse,
   ShoppingPreferences,
+  VirtualTryOnResponse,
 } from "@/lib/types";
 
 const MAX_CLIENT_IMAGE_BYTES = 3.5 * 1024 * 1024;
@@ -372,22 +373,28 @@ export function DemoJourney() {
         signal: controller.signal,
       })
         .then(async (response) => {
-          const payload = (await response.json()) as {
-            resultUrl?: unknown;
-            error?: unknown;
-          };
-          if (!response.ok || typeof payload.resultUrl !== "string") {
-            throw new Error(
-              typeof payload.error === "string"
+          const payload: unknown = await response.json();
+          if (!response.ok || !isVirtualTryOnResponse(payload)) {
+            const errorPayload =
+              typeof payload === "object" && payload !== null && "error" in payload
                 ? payload.error
+                : null;
+            throw new Error(
+              typeof errorPayload === "string"
+                ? errorPayload
                 : "We couldn’t render this shade.",
             );
           }
-          return payload.resultUrl;
+          return payload;
         })
-        .then((resultUrl) => {
+        .then((payload) => {
           if (requestId === vtoRequestRef.current) {
-            dispatch({ type: "vtoReady", resultUrl });
+            dispatch({
+              type: "vtoReady",
+              resultUrl: payload.resultUrl,
+              source: payload.mode,
+              demoFaceUrl: payload.demoFaceUrl,
+            });
           }
         })
         .catch((error: unknown) => {
@@ -410,14 +417,27 @@ export function DemoJourney() {
     [],
   );
 
+  function isVirtualTryOnResponse(
+    payload: unknown,
+  ): payload is VirtualTryOnResponse {
+    if (typeof payload !== "object" || payload === null) return false;
+    if (!("mode" in payload) || !("resultUrl" in payload)) return false;
+    const response = payload as {
+      mode?: unknown;
+      resultUrl?: unknown;
+      demoFaceUrl?: unknown;
+    };
+    return (
+      (response.mode === "recorded" || response.mode === "live") &&
+      typeof response.resultUrl === "string" &&
+      (!("demoFaceUrl" in response) || typeof response.demoFaceUrl === "string")
+    );
+  }
+
   const handleSelectProduct = useCallback((product: Product) => {
     dispatch({ type: "selectProduct", productId: product.id });
-    if (state.analysis?.source === "recorded") {
-      dispatch({ type: "vtoRecordedReady" });
-      return;
-    }
     requestVto(product);
-  }, [requestVto, state.analysis?.source]);
+  }, [requestVto]);
 
   const recommendations = state.analysis
     ? recommendLipsticks(state.analysis, sampleLipstickCatalog, state.preferences)
@@ -536,6 +556,14 @@ export function DemoJourney() {
           <ResultStep
             product={selectedProduct}
             reason={selectedRecommendation?.reason ?? null}
+            snapshot={state.analysis}
+            beforeImageUrl={
+              state.vtoSource === "recorded"
+                ? state.vtoDemoFaceUrl
+                : state.selfieUrl
+            }
+            resultUrl={state.vtoResultUrl}
+            vtoSource={state.vtoSource}
             cartProducts={cartProducts}
             isInCart={state.cartProductIds.includes(selectedProduct.id)}
             onAddToCart={(product) =>

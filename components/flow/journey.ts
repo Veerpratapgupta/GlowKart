@@ -18,6 +18,7 @@ export interface JourneyState {
   vtoPhase: VtoPhase;
   vtoSource: VtoSource | null;
   vtoResultUrl: string | null;
+  vtoDemoFaceUrl: string | null;
   vtoError: string | null;
   preferences: ShoppingPreferences;
 }
@@ -32,8 +33,12 @@ export type JourneyAction =
   | { type: "setPreferences"; preferences: ShoppingPreferences }
   | { type: "vtoLoading" }
   | { type: "vtoCancelled" }
-  | { type: "vtoRecordedReady" }
-  | { type: "vtoReady"; resultUrl: string }
+  | {
+      type: "vtoReady";
+      resultUrl: string;
+      source: VtoSource;
+      demoFaceUrl?: string;
+    }
   | { type: "vtoFailed"; message: string }
   | { type: "selectProduct"; productId: string }
   | { type: "addToCart"; productId: string }
@@ -51,6 +56,7 @@ export const initialJourneyState: JourneyState = {
   vtoPhase: "idle",
   vtoSource: null,
   vtoResultUrl: null,
+  vtoDemoFaceUrl: null,
   vtoError: null,
   preferences: { finish: "sheer", occasion: "everyday" },
 };
@@ -89,6 +95,7 @@ export function journeyReducer(
         vtoPhase: "idle",
         vtoSource: null,
         vtoResultUrl: null,
+        vtoDemoFaceUrl: null,
         vtoError: null,
       };
     case "captureFailed":
@@ -132,6 +139,7 @@ export function journeyReducer(
         vtoPhase: "idle",
         vtoSource: null,
         vtoResultUrl: null,
+        vtoDemoFaceUrl: null,
         vtoError: null,
       };
     case "vtoLoading":
@@ -140,6 +148,7 @@ export function journeyReducer(
         vtoPhase: "loading",
         vtoSource: null,
         vtoResultUrl: null,
+        vtoDemoFaceUrl: null,
         vtoError: null,
       };
     case "vtoCancelled":
@@ -149,22 +158,16 @@ export function journeyReducer(
         vtoPhase: "idle",
         vtoSource: null,
         vtoResultUrl: null,
-        vtoError: null,
-      };
-    case "vtoRecordedReady":
-      return {
-        ...state,
-        vtoPhase: "ready",
-        vtoSource: "recorded",
-        vtoResultUrl: null,
+        vtoDemoFaceUrl: null,
         vtoError: null,
       };
     case "vtoReady":
       return {
         ...state,
         vtoPhase: "ready",
-        vtoSource: "live",
+        vtoSource: action.source,
         vtoResultUrl: action.resultUrl,
+        vtoDemoFaceUrl: action.demoFaceUrl ?? null,
         vtoError: null,
       };
     case "vtoFailed":
@@ -173,6 +176,7 @@ export function journeyReducer(
         vtoPhase: "error",
         vtoSource: null,
         vtoResultUrl: null,
+        vtoDemoFaceUrl: null,
         vtoError: action.message,
       };
     case "addToCart":
@@ -210,6 +214,12 @@ export function journeyReducer(
           state.vtoPhase === "loading"
             ? null
             : state.vtoResultUrl,
+        vtoDemoFaceUrl:
+          state.step === "tryOn" &&
+          action.step !== "tryOn" &&
+          state.vtoPhase === "loading"
+            ? null
+            : state.vtoDemoFaceUrl,
         vtoError:
           state.step === "tryOn" &&
           action.step !== "tryOn" &&

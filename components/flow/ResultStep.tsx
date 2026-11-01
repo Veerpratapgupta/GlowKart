@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Action } from "@/components/ui/Action";
 import { DemoBadge } from "@/components/ui/DemoBadge";
+import { Notice } from "@/components/ui/Notice";
 import { ProductSwatch } from "@/components/ui/ProductSwatch";
 import { formatUsd } from "@/lib/format";
-import type { Product } from "@/lib/types";
+import type { Product, SkinSnapshot, VtoSource } from "@/lib/types";
 import { StepShell } from "./StepShell";
 
 interface ResultStepProps {
   product: Product;
   reason: string | null;
+  snapshot: SkinSnapshot | null;
+  beforeImageUrl: string | null;
+  resultUrl: string | null;
+  vtoSource: VtoSource | null;
   cartProducts: Product[];
   isInCart: boolean;
   onAddToCart: (product: Product) => void;
@@ -18,6 +23,10 @@ interface ResultStepProps {
 export function ResultStep({
   product,
   reason,
+  snapshot,
+  beforeImageUrl,
+  resultUrl,
+  vtoSource,
   cartProducts,
   isInCart,
   onAddToCart,
@@ -42,7 +51,15 @@ export function ResultStep({
     <StepShell
       title="Your edit"
       lede="The look you kept, with a lightweight prototype cart. No account, no checkout."
-      meta={<DemoBadge label="Prototype cart · sample products" />}
+      meta={
+        <DemoBadge
+          label={
+            vtoSource === "recorded"
+              ? "Recorded YouCam VTO · demo face"
+              : "Live YouCam VTO"
+          }
+        />
+      }
       actions={
         <>
           <Action
@@ -59,6 +76,55 @@ export function ResultStep({
       }
     >
       <div className="space-y-6">
+        <section aria-label="Before and after preview" className="border border-ink bg-paper">
+          <div className="grid gap-px bg-line sm:grid-cols-2">
+            <figure className="bg-paper-deep">
+              {beforeImageUrl ? (
+                <img
+                  src={beforeImageUrl}
+                  alt={
+                    vtoSource === "recorded"
+                      ? "Stock demo face before the recorded lipstick preview"
+                      : "Your selfie before lipstick"
+                  }
+                  className="aspect-[4/5] w-full object-cover"
+                />
+              ) : (
+                <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
+                  Before image unavailable
+                </div>
+              )}
+              <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
+                Before
+              </figcaption>
+            </figure>
+            <figure className="bg-paper-deep">
+              {resultUrl ? (
+                <img
+                  src={resultUrl}
+                  alt={`YouCam preview of ${product.shadeName} lipstick`}
+                  className="aspect-[4/5] w-full object-cover"
+                />
+              ) : (
+                <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
+                  Result image unavailable
+                </div>
+              )}
+              <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
+                After · YouCam VTO
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        {vtoSource === "recorded" ? (
+          <Notice tone="info" title="Demo face notice">
+            This recorded preview uses a stock demo face, not your uploaded
+            photo. It is not a customer or endorser, and this result is not a
+            fresh personalized render.
+          </Notice>
+        ) : null}
+
         <section aria-label="Kept product" className="border border-line bg-paper">
           <div className="flex gap-4 px-5 py-5">
             <ProductSwatch product={product} size="md" />
@@ -80,6 +146,38 @@ export function ResultStep({
               <span className="text-stone-deep">{reason}</span>
             </p>
           ) : null}
+        </section>
+
+        <section aria-label="AI trail" className="border border-line bg-paper">
+          <div className="border-b border-line px-5 py-4">
+            <p className="text-[0.78rem] font-medium text-botanic">YouCam Skin AI</p>
+            <h3 className="mt-1 font-display text-xl font-medium">
+              How this look was chosen
+            </h3>
+          </div>
+          <div className="space-y-4 px-5 py-5">
+            {snapshot?.observations.map((observation) => (
+              <div key={observation.id} className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-medium">{observation.title}</p>
+                  <p className="mt-1 text-[0.88rem] leading-relaxed text-stone-deep">
+                    {observation.detail}
+                  </p>
+                </div>
+                {observation.uiScore !== undefined ? (
+                  <span className="shrink-0 text-[0.85rem] font-medium text-botanic">
+                    {observation.uiScore}/100
+                  </span>
+                ) : null}
+              </div>
+            ))}
+            {reason ? (
+              <p className="border-t border-line pt-4 text-[0.92rem] leading-relaxed">
+                <span className="font-medium">Rationale: </span>
+                <span className="text-stone-deep">{reason}</span>
+              </p>
+            ) : null}
+          </div>
         </section>
 
         <section aria-label="Prototype cart" className="border border-line bg-paper">

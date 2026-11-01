@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { demoFaceUrl, recordedVtoResults } from "@/lib/mock/recorded-vto";
 import { MAX_SELFIE_REQUEST_BYTES, validateSelfieFile } from "@/lib/selfie-validation";
 import { createLipstickVto, YouCamVtoError } from "@/lib/youcam/virtual-try-on";
 import { sampleLipstickCatalog } from "@/lib/mock/catalog";
+import type { VirtualTryOnResponse } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -37,6 +39,30 @@ export async function POST(request: Request) {
   if (!validation.ok) return response({ error: validation.message }, 415);
   const product = sampleLipstickCatalog.find((item) => item.id === productId);
   if (!product) return response({ error: "That product is not available." }, 404);
+  const mode = process.env.GLOWCART_ANALYSIS_MODE ?? "recorded";
+  if (mode === "recorded") {
+    const resultUrl = recordedVtoResults[product.id as keyof typeof recordedVtoResults];
+    if (!resultUrl) {
+      return response(
+        { error: "Recorded virtual try-on is not configured for that product." },
+        500,
+      );
+    }
+    const payload: VirtualTryOnResponse = {
+      mode: "recorded",
+      resultUrl,
+      demoFaceUrl,
+    };
+    return NextResponse.json(payload, {
+      headers: { "Cache-Control": "no-store" },
+    });
+  }
+  if (mode !== "live") {
+    return response(
+      { error: "GlowCart virtual try-on mode is not configured correctly." },
+      500,
+    );
+  }
   if (process.env.GLOWCART_LIVE_DEPLOYMENT !== "protected") {
     return response(
       { error: "Live virtual try-on is available only on a protected deployment." },
@@ -45,10 +71,10 @@ export async function POST(request: Request) {
   }
   try {
     const resultUrl = await createLipstickVto(image, product, request.signal);
-    return NextResponse.json(
-      { mode: "live", resultUrl },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    const payload: VirtualTryOnResponse = { mode: "live", resultUrl };
+    return NextResponse.json(payload, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (error) {
     if (error instanceof YouCamVtoError) {
       if (error.status === 422 || error.status === 504) {

@@ -78,7 +78,7 @@ test("navigation itself resets an in-flight analysis", () => {
   assert.equal(navigatedState.analysisPhase, "idle");
 });
 
-test("cancelling VTO clears loading and recorded previews unlock the keep action", () => {
+test("cancelling VTO clears loading and recorded results unlock the keep action", () => {
   const readyState = journeyReducer(
     journeyReducer(
       journeyReducer(initialJourneyState, { type: "start" }),
@@ -97,11 +97,16 @@ test("cancelling VTO clears loading and recorded previews unlock the keep action
   const loadingState = journeyReducer(previewState, { type: "vtoLoading" });
   const cancelledState = journeyReducer(loadingState, { type: "vtoCancelled" });
   const recordedState = journeyReducer(cancelledState, {
-    type: "vtoRecordedReady",
+    type: "vtoReady",
+    resultUrl: "/demo/vto-sun-coral.jpg",
+    source: "recorded",
+    demoFaceUrl: "/demo/demo-selfie.jpg",
   });
 
   assert.equal(cancelledState.vtoPhase, "idle");
   assert.equal(cancelledState.vtoSource, null);
   assert.equal(recordedState.vtoPhase, "ready");
   assert.equal(recordedState.vtoSource, "recorded");
+  assert.equal(recordedState.vtoResultUrl, "/demo/vto-sun-coral.jpg");
+  assert.equal(recordedState.vtoDemoFaceUrl, "/demo/demo-selfie.jpg");
 });

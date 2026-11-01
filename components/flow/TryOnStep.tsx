@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Action } from "@/components/ui/Action";
 import { DemoBadge } from "@/components/ui/DemoBadge";
 import { Notice } from "@/components/ui/Notice";
@@ -34,10 +35,16 @@ export function TryOnStep({
   onRetry,
   onResultError,
 }: TryOnStepProps) {
+  const [recordedAssetMissing, setRecordedAssetMissing] = useState(false);
+
+  useEffect(() => {
+    setRecordedAssetMissing(false);
+  }, [product.id, vtoResultUrl]);
+
   const previewReady =
     vtoPhase === "ready" &&
-    ((vtoSource === "live" && Boolean(vtoResultUrl)) ||
-      (vtoSource === "recorded" && Boolean(selfieUrl)));
+    Boolean(vtoResultUrl) &&
+    (vtoSource === "live" || vtoSource === "recorded");
 
   return (
     <StepShell
@@ -47,7 +54,7 @@ export function TryOnStep({
         <DemoBadge
           label={
             vtoSource === "recorded"
-              ? "Recorded shade simulation"
+              ? "Recorded YouCam VTO · demo face"
               : vtoSource === "live"
                 ? "Live YouCam VTO"
                 : "YouCam VTO"
@@ -69,7 +76,19 @@ export function TryOnStep({
     >
       <div className="space-y-5">
         <div className="relative overflow-hidden border border-ink bg-paper-deep">
-          {vtoPhase === "ready" && vtoSource === "live" && vtoResultUrl ? (
+          {vtoPhase === "ready" &&
+          vtoSource === "recorded" &&
+          vtoResultUrl &&
+          !recordedAssetMissing ? (
+            <img
+              key={vtoResultUrl}
+              src={vtoResultUrl}
+              alt={`Recorded YouCam preview of ${product.shadeName} on a demo face`}
+              className="aspect-[4/5] w-full object-cover"
+              referrerPolicy="no-referrer"
+              onError={() => setRecordedAssetMissing(true)}
+            />
+          ) : vtoPhase === "ready" && vtoSource === "live" && vtoResultUrl ? (
             <img
               key={vtoResultUrl}
               src={vtoResultUrl}
@@ -78,7 +97,10 @@ export function TryOnStep({
               referrerPolicy="no-referrer"
               onError={onResultError}
             />
-          ) : vtoPhase === "ready" && vtoSource === "recorded" && selfieUrl ? (
+          ) : vtoPhase === "ready" &&
+            vtoSource === "recorded" &&
+            recordedAssetMissing &&
+            selfieUrl ? (
             <div className="relative aspect-[4/5] w-full overflow-hidden">
               <img
                 src={selfieUrl}
@@ -95,7 +117,7 @@ export function TryOnStep({
                   Shade direction simulation
                 </p>
                 <p className="mt-1 text-[0.78rem] text-paper/80">
-                  Your selfie + selected swatch · not a live render
+                  Swatch fallback · recorded asset is not available
                 </p>
               </div>
             </div>
@@ -112,7 +134,7 @@ export function TryOnStep({
                 />
                 <p className="mt-4 font-medium">Rendering {product.shadeName}</p>
                 <p className="mt-1 text-[0.88rem] text-stone-deep">
-                  The original selfie will be replaced when the live result is ready.
+                  The preview will appear when the result is ready.
                 </p>
               </div>
             </div>
@@ -165,13 +187,25 @@ export function TryOnStep({
 
         {vtoPhase === "loading" ? (
           <Notice tone="info" title="Rendering your shade">
-            YouCam is preparing a live lipstick preview.
+            {vtoSource === "recorded"
+              ? "Loading the recorded YouCam preview."
+              : "YouCam is preparing a live lipstick preview."}
           </Notice>
         ) : null}
-        {vtoPhase === "ready" && vtoSource === "recorded" ? (
+        {vtoPhase === "ready" &&
+        vtoSource === "recorded" &&
+        !recordedAssetMissing ? (
           <Notice tone="info" title="Recorded preview simulation">
-            This is a clearly labeled simulation using your uploaded selfie and
-            the selected shade swatch. It is not a live YouCam render.
+            This recorded YouCam result uses the labeled demo face rather than
+            a fresh render of your photo.
+          </Notice>
+        ) : null}
+        {vtoPhase === "ready" &&
+        vtoSource === "recorded" &&
+        recordedAssetMissing ? (
+          <Notice tone="info" title="Recorded asset unavailable">
+            The saved preview is not available yet, so this labeled swatch
+            fallback is for shade direction only.
           </Notice>
         ) : null}
         {vtoPhase === "error" ? (
