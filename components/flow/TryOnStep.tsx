@@ -76,18 +76,57 @@ export function TryOnStep({
     >
       <div className="space-y-5">
         <div className="relative overflow-hidden border border-ink bg-paper-deep">
-          {vtoPhase === "ready" &&
-          vtoSource === "recorded" &&
-          vtoResultUrl &&
-          !recordedAssetMissing ? (
-            <img
-              key={vtoResultUrl}
-              src={vtoResultUrl}
-              alt={`Recorded YouCam preview of ${product.shadeName} on a demo face`}
-              className="aspect-[4/5] w-full object-cover"
-              referrerPolicy="no-referrer"
-              onError={() => setRecordedAssetMissing(true)}
-            />
+          {vtoPhase === "ready" && vtoSource === "recorded" ? (
+            <div className="grid gap-px bg-line sm:grid-cols-2">
+              <figure className="bg-paper-deep">
+                {selfieUrl ? (
+                  <img
+                    src={selfieUrl}
+                    alt="Your uploaded selfie"
+                    className="aspect-[4/5] w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
+                    Your uploaded photo is unavailable.
+                  </div>
+                )}
+                <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
+                  Your photo
+                </figcaption>
+              </figure>
+              <figure className="bg-paper-deep">
+                {vtoResultUrl && !recordedAssetMissing ? (
+                  <img
+                    key={vtoResultUrl}
+                    src={vtoResultUrl}
+                    alt={`Recorded YouCam preview of ${product.shadeName} on a demo face`}
+                    className="aspect-[4/5] w-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={() => setRecordedAssetMissing(true)}
+                  />
+                ) : selfieUrl ? (
+                  <div className="relative aspect-[4/5] w-full overflow-hidden">
+                    <img
+                      src={selfieUrl}
+                      alt={`Your uploaded selfie paired with a ${product.shadeName} color simulation`}
+                      className="h-full w-full object-cover"
+                    />
+                    <div
+                      className="absolute inset-x-0 bottom-0 h-[46%] opacity-25 mix-blend-multiply"
+                      style={{ backgroundColor: product.swatchHex }}
+                      aria-hidden="true"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
+                    Recorded preview unavailable.
+                  </div>
+                )}
+                <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
+                  Recorded reference · demo face
+                </figcaption>
+              </figure>
+            </div>
           ) : vtoPhase === "ready" && vtoSource === "live" && vtoResultUrl ? (
             <img
               key={vtoResultUrl}
@@ -97,30 +136,6 @@ export function TryOnStep({
               referrerPolicy="no-referrer"
               onError={onResultError}
             />
-          ) : vtoPhase === "ready" &&
-            vtoSource === "recorded" &&
-            recordedAssetMissing &&
-            selfieUrl ? (
-            <div className="relative aspect-[4/5] w-full overflow-hidden">
-              <img
-                src={selfieUrl}
-                alt={`Your uploaded selfie paired with a ${product.shadeName} color simulation`}
-                className="h-full w-full object-cover"
-              />
-              <div
-                className="absolute inset-x-0 bottom-0 h-[46%] opacity-25 mix-blend-multiply"
-                style={{ backgroundColor: product.swatchHex }}
-                aria-hidden="true"
-              />
-              <div className="absolute inset-x-4 bottom-4 border border-paper/70 bg-ink/75 px-3 py-2 text-paper">
-                <p className="text-[0.78rem] font-medium uppercase tracking-[0.12em]">
-                  Shade direction simulation
-                </p>
-                <p className="mt-1 text-[0.78rem] text-paper/80">
-                  Swatch fallback · recorded asset is not available
-                </p>
-              </div>
-            </div>
           ) : vtoPhase === "loading" ? (
             <div
               className="flex aspect-[4/5] w-full items-center justify-center bg-paper-deep px-8"
