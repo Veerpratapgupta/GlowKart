@@ -11,6 +11,7 @@ interface ResultStepProps {
   product: Product;
   reason: string | null;
   snapshot: SkinSnapshot | null;
+  selfieUrl: string | null;
   beforeImageUrl: string | null;
   resultUrl: string | null;
   vtoSource: VtoSource | null;
@@ -24,6 +25,7 @@ export function ResultStep({
   product,
   reason,
   snapshot,
+  selfieUrl,
   beforeImageUrl,
   resultUrl,
   vtoSource,
@@ -99,7 +101,25 @@ export function ResultStep({
               </figcaption>
             </figure>
             <figure className="bg-paper-deep">
-              {resultUrl ? (
+              {vtoSource === "recorded" && selfieUrl ? (
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  <img
+                    src={selfieUrl}
+                    alt={`Your uploaded selfie with a ${product.shadeName} shade-direction simulation`}
+                    className="h-full w-full object-cover"
+                  />
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 opacity-20 mix-blend-multiply"
+                    style={{
+                      background: `linear-gradient(to top, ${product.swatchHex}, transparent)`,
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span className="absolute inset-x-3 bottom-3 border border-paper/70 bg-ink/75 px-2 py-1 text-center text-[0.7rem] font-medium text-paper">
+                    Shade direction only · not a lip render
+                  </span>
+                </div>
+              ) : resultUrl ? (
                 <img
                   src={resultUrl}
                   alt={`YouCam preview of ${product.shadeName} lipstick`}
@@ -112,7 +132,7 @@ export function ResultStep({
               )}
               <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
                 {vtoSource === "recorded"
-                  ? "After reference · YouCam VTO demo face"
+                  ? "After direction · your photo"
                   : "After · YouCam VTO"}
               </figcaption>
             </figure>
@@ -120,11 +140,25 @@ export function ResultStep({
         </section>
 
         {vtoSource === "recorded" ? (
-          <Notice tone="info" title="Demo face notice">
-            Before shows your uploaded photo. The recorded after reference uses
-            a stock demo face, not your photo. It is not a customer or endorser,
-            and this result is not a fresh personalized render.
+          <Notice tone="info" title="Recorded demo reference">
+            This before/after direction uses your uploaded photo with a labeled
+            shade simulation. The saved YouCam reference below uses a stock
+            demo face, not your photo; it is not a customer or endorser and is
+            not a fresh personalized render.
           </Notice>
+        ) : null}
+
+        {vtoSource === "recorded" && resultUrl ? (
+          <figure className="border border-line bg-paper p-3">
+            <img
+              src={resultUrl}
+              alt={`Recorded YouCam reference of ${product.shadeName} on a demo face`}
+              className="mx-auto aspect-[4/5] max-h-[28rem] w-full object-contain"
+            />
+            <figcaption className="px-1 pt-3 text-[0.8rem] text-stone-deep">
+              Recorded YouCam reference · demo face · not a render of your photo
+            </figcaption>
+          </figure>
         ) : null}
 
         <section aria-label="Kept product" className="border border-line bg-paper">

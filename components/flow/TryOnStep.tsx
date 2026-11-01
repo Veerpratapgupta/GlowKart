@@ -11,6 +11,7 @@ import { StepShell } from "./StepShell";
 interface TryOnStepProps {
   selfieUrl: string | null;
   product: Product;
+  analysisMode: "recorded" | "live";
   reason: string | null;
   onKeep: () => void;
   onTryAnother: () => void;
@@ -25,6 +26,7 @@ interface TryOnStepProps {
 export function TryOnStep({
   selfieUrl,
   product,
+  analysisMode,
   reason,
   onKeep,
   onTryAnother,
@@ -57,7 +59,9 @@ export function TryOnStep({
               ? "Recorded YouCam VTO · demo face"
               : vtoSource === "live"
                 ? "Live YouCam VTO"
-                : "YouCam VTO"
+                : analysisMode === "recorded"
+                  ? "Recorded YouCam VTO"
+                  : "YouCam VTO"
           }
         />
       }
@@ -80,18 +84,30 @@ export function TryOnStep({
             <div className="grid gap-px bg-line sm:grid-cols-2">
               <figure className="bg-paper-deep">
                 {selfieUrl ? (
-                  <img
-                    src={selfieUrl}
-                    alt="Your uploaded selfie"
-                    className="aspect-[4/5] w-full object-cover"
-                  />
+                  <div className="relative aspect-[4/5] overflow-hidden">
+                    <img
+                      src={selfieUrl}
+                      alt="Your uploaded selfie with a labeled shade-direction simulation"
+                      className="h-full w-full object-cover"
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 opacity-20 mix-blend-multiply"
+                      style={{
+                        background: `linear-gradient(to top, ${product.swatchHex}, transparent)`,
+                      }}
+                      aria-hidden="true"
+                    />
+                    <span className="absolute inset-x-3 bottom-3 border border-paper/70 bg-ink/75 px-2 py-1 text-center text-[0.7rem] font-medium text-paper">
+                      Shade direction only · not a lip render
+                    </span>
+                  </div>
                 ) : (
                   <div className="flex aspect-[4/5] items-center justify-center px-5 text-center text-sm text-stone-deep">
                     Your uploaded photo is unavailable.
                   </div>
                 )}
                 <figcaption className="border-t border-line px-4 py-3 text-[0.8rem] font-medium text-stone-deep">
-                  Your photo
+                  Your photo · shade direction
                 </figcaption>
               </figure>
               <figure className="bg-paper-deep">
@@ -202,7 +218,7 @@ export function TryOnStep({
 
         {vtoPhase === "loading" ? (
           <Notice tone="info" title="Rendering your shade">
-            {vtoSource === "recorded"
+            {analysisMode === "recorded"
               ? "Loading the recorded YouCam preview."
               : "YouCam is preparing a live lipstick preview."}
           </Notice>

@@ -532,6 +532,7 @@ export function DemoJourney({
           <TryOnStep
             selfieUrl={state.selfieUrl}
             product={selectedProduct}
+            analysisMode={analysisMode}
             reason={selectedRecommendation?.reason ?? null}
             vtoPhase={state.vtoPhase}
             vtoSource={state.vtoSource}
@@ -566,6 +567,7 @@ export function DemoJourney({
             product={selectedProduct}
             reason={selectedRecommendation?.reason ?? null}
             snapshot={state.analysis}
+            selfieUrl={state.selfieUrl}
             beforeImageUrl={state.selfieUrl}
             resultUrl={state.vtoResultUrl}
             vtoSource={state.vtoSource}
